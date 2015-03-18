@@ -77,113 +77,130 @@
 //	TYPVARIND:	(str on astk[]) [subs] OPVAR TYPEVARIND #subs
 
 short localvar()                                // evaluate local variable
-{ char c;                                       // current character
-  u_char idx = 0;				// index
-  int i;                                        // a usefull int
-  int count = 0;				// count subscripts
-  var_u var;                                    // to hold variable names
-  u_char *ptr;					// to save comp_ptr
-  short type = TYPVARNAM;			// the type code
-  short ret;					// the return
+{
+    char c;                                       // current character
+    u_char idx = 0;                // index
+    int i;                                        // a usefull int
+    int count = 0;                // count subscripts
+    var_u var;                                    // to hold variable names
+    u_char *ptr;                    // to save comp_ptr
+    short type = TYPVARNAM;            // the type code
+    short ret;                    // the return
 
-  ptr = comp_ptr;				// save comp_ptr
-  c = *source_ptr++;                            // get a character
-  if (c == '^')					// if it's global
-  { type = TYPVARGBL;				// say it's global
-    c = *source_ptr++;				// point past it
-    if (c == '[')				// uci/env specified
-    { type = TYPVARGBLUCI;			// we have a uci specified
-      atom();					// eval the argument
-      c = *source_ptr++; 			// get next
-      if (c == ',')				// if it's a comma
-      { type = TYPVARGBLUCIENV;			// say we have vol as well
-	atom();					// eval the argument
-	c = *source_ptr++; 			// get next
-      }
-      if (c != ']') return (-(ERRZ12+ERRMLAST)); // that's junk
-      c = *source_ptr++; 			// get next
+    ptr = comp_ptr;                // save comp_ptr
+    c = *source_ptr++;                            // get a character
+    if (c == '^')                    // if it's global
+    {
+        type = TYPVARGBL;                // say it's global
+        c = *source_ptr++;                // point past it
+        if (c == '[')                // uci/env specified
+        {
+            type = TYPVARGBLUCI;            // we have a uci specified
+            atom();                    // eval the argument
+            c = *source_ptr++;            // get next
+            if (c == ',')                // if it's a comma
+            {
+                type = TYPVARGBLUCIENV;            // say we have vol as well
+                atom();                    // eval the argument
+                c = *source_ptr++;            // get next
+            }
+            if (c != ']') return (-(ERRZ12 + ERRMLAST)); // that's junk
+            c = *source_ptr++;            // get next
+        }
+        else if (c == '(')                // naked reference ?
+        {
+            type = TYPVARNAKED;            // set type
+            source_ptr--;                // back up source
+            goto subs;
+        }
     }
-    else if (c == '(')				// naked reference ?
-    { type = TYPVARNAKED;			// set type
-      source_ptr--;				// back up source
-      goto subs;
+    else if (c == '@')                // indirect ?
+    {
+        type = TYPVARIND;                // yes @...@ ... on astk[]
+        if (*source_ptr == '(') goto subs;        // go do subscripts
+        return (-(ERRZ12 + ERRMLAST));        // else it's junk
     }
-  }
-  else if (c == '@')				// indirect ?
-  { type = TYPVARIND;				// yes @...@ ... on astk[]
-    if (*source_ptr == '(') goto subs;		// go do subscripts
-    return (-(ERRZ12+ERRMLAST));		// else it's junk
-  }
-  if ((isalpha((int)c) == 0) && (c != '%') && (c != '$')) // check for a variable
-    return (-(ERRZ12+ERRMLAST));                // return the error
-  if ((c == '$') && (type == TYPVARNAM))	// check $...
-  { if (isalpha(*source_ptr) == 0)		// next must be alpha
-    { return (-(ERRZ12+ERRMLAST));              // return the error
+    if ((isalpha((int) c) == 0) && (c != '%') && (c != '$')) // check for a variable
+        return (-(ERRZ12 + ERRMLAST));                // return the error
+    if ((c == '$') && (type == TYPVARNAM))    // check $...
+    {
+        if (isalpha(*source_ptr) == 0)        // next must be alpha
+        {
+            return (-(ERRZ12 + ERRMLAST));              // return the error
+        }
+        i = toupper(*source_ptr);            // get the next character
+        if (strchr("DEHIJKPQRSTXY", i) == NULL)    // if letter is invalid
+        {
+            return -ERRM8;                // complain
+        }
     }
-    i = toupper(*source_ptr);			// get the next character
-    if (strchr("DEHIJKPQRSTXY", i) == NULL)	// if letter is invalid
-    { return -ERRM8;				// complain
+    var.var_qu = 0;                               // clear the variable name
+    var.var_cu[0] = c;                            // save first char
+    for (i = 1; i < 8; i++)                         // scan for rest of name
+    {
+        c = *source_ptr++;                          // get next char
+        if (isalnum((int) c) == 0)                   // if not alpha numeric
+        {
+            --source_ptr;                             // point back at it
+            break;                                    // and exit
+        }
+        var.var_cu[i] = c;                          // save in the variable
     }
-  }
-  var.var_qu = 0;                               // clear the variable name
-  var.var_cu[0] = c;                            // save first char
-  for (i = 1; i<8; i++)                         // scan for rest of name
-  { c = *source_ptr++;                          // get next char
-    if (isalnum((int)c) == 0)                   // if not alpha numeric
-    { --source_ptr;                             // point back at it
-      break;                                    // and exit
+    while (isalnum(*source_ptr) != 0) source_ptr++; // skip extended name
+    subs:
+    if (*source_ptr == '(')                       // see if it's subscripted
+    {
+        source_ptr++;                // skip the bracket
+        while (TRUE)                // loop
+        {
+            eval();                    // get a subscript
+            count++;                    // count it
+            c = *source_ptr++;            // get next character
+            if (c == ')') break;            // quit when done
+            if (c != ',') return (-(ERRZ12 + ERRMLAST)); // return the error
+        }
     }
-    var.var_cu[i] = c;                          // save in the variable
-  }
-  while (isalnum(*source_ptr) !=0) source_ptr++; // skip extended name
-subs:
-  if (*source_ptr == '(')                       // see if it's subscripted
-  { source_ptr++;				// skip the bracket
-    while (TRUE)				// loop
-    { eval();					// get a subscript
-      count++;					// count it
-      c = *source_ptr++;			// get next character
-      if (c == ')') break;			// quit when done
-      if (c != ',') return (-(ERRZ12+ERRMLAST)); // return the error
+    if (count > TYPMAXSUB)            // too many
+        return -(ERRZ15 + ERRMLAST);            // error
+    ret = comp_ptr - ptr;                // remember here
+    *comp_ptr++ = OPVAR;                // opcode
+    if ((type < TYPVARGBL) &&            // candidate for index?
+            (partab.varlst != NULL) &&        // and in a routine compile
+            (var.var_cu[0] != '$'))            // and it's not $...
+    {
+        for (i = 0; ; i++)                // scan list
+        {
+            if (i == 256) break;            // too many
+            if (partab.varlst[i].var_qu == var.var_qu)
+                break;                    // found it
+            if (partab.varlst[i].var_qu == 0) {
+                partab.varlst[i].var_qu = var.var_qu;    // set it
+                break;
+            }
+        }
+        if (i != 256) {
+            type |= TYPVARIDX;            // change the type
+            idx = i;                    // save index
+        }
     }
-  }
-  if (count > TYPMAXSUB)			// too many
-    return -(ERRZ15+ERRMLAST);			// error
-  ret = comp_ptr - ptr;				// remember here
-  *comp_ptr++ = OPVAR;				// opcode
-  if ((type < TYPVARGBL) &&			// candidate for index?
-      (partab.varlst != NULL) &&		// and in a routine compile
-      (var.var_cu[0] != '$'))			// and it's not $...
-  { for (i = 0; ; i++)				// scan list
-    { if (i == 256) break;			// too many
-      if (partab.varlst[i].var_qu == var.var_qu)
-        break;					// found it
-      if (partab.varlst[i].var_qu == 0)
-      { partab.varlst[i].var_qu = var.var_qu;	// set it
-	break;
-      }
+    if (type < TYPVARNAKED)            // normal local or global var
+    {
+        type = type + count;            // add the count
+        *comp_ptr++ = (u_char) type;        // store it
+        if (type & TYPVARIDX)            // index type?
+            *comp_ptr++ = idx;            // save the index
     }
-    if (i != 256)
-    { type |= TYPVARIDX;			// change the type
-      idx = i;					// save index
+    else                        // funnee type
+    {
+        *comp_ptr++ = (u_char) type;        // store the type
+        *comp_ptr++ = count;            // then the subscripts
     }
-  }
-  if (type < TYPVARNAKED)			// normal local or global var
-  { type = type + count;			// add the count
-    *comp_ptr++ = (u_char) type;		// store it
-    if (type & TYPVARIDX)			// index type?
-      *comp_ptr++ = idx;			// save the index
-  }
-  else						// funnee type
-  { *comp_ptr++ = (u_char) type;		// store the type
-    *comp_ptr++ = count;			// then the subscripts
-  }
-  if (((type < TYPVARIDX) ||			// if simple local (not idx)
-       (type >= TYPVARGBL)) &&			// a 'normal' global
-      (type != TYPVARNAKED) &&			// and not naked
-      (type != TYPVARIND))			// or indirect
-    for (i = 0; i<8; i++)                       // scan the name
-      *comp_ptr++ = var.var_cu[i];              // copy into compiled code
-  return ret;					// say what we did
+    if (((type < TYPVARIDX) ||            // if simple local (not idx)
+            (type >= TYPVARGBL)) &&            // a 'normal' global
+            (type != TYPVARNAKED) &&            // and not naked
+            (type != TYPVARIND))            // or indirect
+        for (i = 0; i < 8; i++)                       // scan the name
+            *comp_ptr++ = var.var_cu[i];              // copy into compiled code
+    return ret;                    // say what we did
 }                                               // end variable parse
 

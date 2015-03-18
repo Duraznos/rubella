@@ -77,12 +77,12 @@
 #define ERRM26       26      // Non-existent environment
 #define ERRM28       28      // Mathematical function, param out of range
 #define ERRM29       29      // SET or KILL on ssvn not allowed by
-                             // implementation
+// implementation
 #define ERRM33       33      // SET or KILL to ^$ROUTINE when routine exists
 #define ERRM35       35      // Device does not support mnemonicspace
 #define ERRM36       36      // Incompatible mnemonicspaces
 #define ERRM37       37      // READ from device identified by the empty
-                             // string
+// string
 #define ERRM38       38      // Invalid ssvn subscript
 #define ERRM39       39      // Invalid $NAME argument
 #define ERRM40       40      // Call-by-reference in JOB actual
@@ -92,10 +92,10 @@
 #define ERRM47       47      // Invalid attribute name
 #define ERRM56       56      // Name length exceeds implementation's limit
 #define ERRM57       57      // More than one defining occurrence of label
-                             // in routine
+// in routine
 #define ERRM58       58      // Too few formal parameters
 #define ERRM59       59      // Environment reference not permitted for this
-                             // ssvn
+// ssvn
 #define ERRM60       60      // Undefined ssvn
 #define ERRM75       75      // String length exceeds implementation's limit
 #define ERRM92       92      // Mathematical overflow
@@ -112,83 +112,83 @@
 #define ERRZ4        4       // Error in data base create 
 #define ERRZ5        5       // Null character not permitted in key
 #define ERRZ6        6       // Error when reading from database file
-#define ERRZ7	     7	     // Do stack overflow
-#define ERRZ8	     8       // String stack overflow
-#define ERRZ9	     9	     // Invalid BREAK parameter
-#define ERRZ10	     10      // String stack underflow
+#define ERRZ7         7         // Do stack overflow
+#define ERRZ8         8       // String stack overflow
+#define ERRZ9         9         // Invalid BREAK parameter
+#define ERRZ10         10      // String stack underflow
 #define ERRZ11       11      // Database file is full cannot SET
 #define ERRZ12       12      // Expression syntax error
-#define ERRZ13	     13      // Command syntax error
-#define ERRZ14	     14	     // Unknown op code encountered
-#define ERRZ15	     15      // Too many subscripts
-#define ERRZ16	     16      // null subscript
-#define ERRZ17	     17	     // Too many IF commands in one line (256 max)
-#define ERRZ18	     18	     // Unknown external routine
-#define ERRZ19	     19	     // Too many nested FOR commands (max 256)
+#define ERRZ13         13      // Command syntax error
+#define ERRZ14         14         // Unknown op code encountered
+#define ERRZ15         15      // Too many subscripts
+#define ERRZ16         16      // null subscript
+#define ERRZ17         17         // Too many IF commands in one line (256 max)
+#define ERRZ18         18         // Unknown external routine
+#define ERRZ19         19         // Too many nested FOR commands (max 256)
 
 // ** The following are the sequential IO implementation specific errors **
 
-#define ERRZ20		20	// IO: Unknown internal error
-#define ERRZ21		21	// IO: Unrecognised operation
-#define ERRZ22		22	// IO: Timeout < -1
-#define ERRZ23		23	// IO: Operation timed out
-#define ERRZ24		24	// IO: Device not supported
-#define ERRZ25		25	// IO: Channel out of range
-#define ERRZ26		26	// IO: Channel not free
-#define ERRZ27		27	// IO: Channel free
-#define ERRZ28		28	// IO: Unexpected NULL value
-#define ERRZ29		29	// IO: Can not determine object from operation
-#define ERRZ30		30	// IO: Unrecognised object
-#define ERRZ31		31	// IO: Set bit flag out of range
+#define ERRZ20        20    // IO: Unknown internal error
+#define ERRZ21        21    // IO: Unrecognised operation
+#define ERRZ22        22    // IO: Timeout < -1
+#define ERRZ23        23    // IO: Operation timed out
+#define ERRZ24        24    // IO: Device not supported
+#define ERRZ25        25    // IO: Channel out of range
+#define ERRZ26        26    // IO: Channel not free
+#define ERRZ27        27    // IO: Channel free
+#define ERRZ28        28    // IO: Unexpected NULL value
+#define ERRZ29        29    // IO: Can not determine object from operation
+#define ERRZ30        30    // IO: Unrecognised object
+#define ERRZ31        31    // IO: Set bit flag out of range
 
-#define ERRZ33		33	// IO: Number of bytes for buffer out of range
-#define ERRZ34		34	// IO: Control character expected
-#define ERRZ35		35	// IO: Unrecognised mode
-#define ERRZ36		36	// IO: Maximum bytes to read < -1
-#define ERRZ37		37	// IO: Read buffer size exceeded
-#define ERRZ38		38	// IO: End of file has been reached
-#define ERRZ39		39	// IO: $KEY to long
-#define ERRZ40		40	// IO: Bytes to write < 0
-#define ERRZ41		41	// IO: Write format specifier < -2
-#define ERRZ42		42	// IO: Maximum number of jobs could be exceeded
-#define ERRZ43		43	// IO: Device not found or a character special
-				//      device
-#define ERRZ44		44	// IO: Printf failed
-#define ERRZ45		45	// IO: Unsigned integer value expected
-#define ERRZ46		46	// IO: Peer has disconnected
-#define ERRZ47		47	// IO: Peer not connected
-#define ERRZ48		48	// IO: Invalid Internet address
+#define ERRZ33        33    // IO: Number of bytes for buffer out of range
+#define ERRZ34        34    // IO: Control character expected
+#define ERRZ35        35    // IO: Unrecognised mode
+#define ERRZ36        36    // IO: Maximum bytes to read < -1
+#define ERRZ37        37    // IO: Read buffer size exceeded
+#define ERRZ38        38    // IO: End of file has been reached
+#define ERRZ39        39    // IO: $KEY to long
+#define ERRZ40        40    // IO: Bytes to write < 0
+#define ERRZ41        41    // IO: Write format specifier < -2
+#define ERRZ42        42    // IO: Maximum number of jobs could be exceeded
+#define ERRZ43        43    // IO: Device not found or a character special
+//      device
+#define ERRZ44        44    // IO: Printf failed
+#define ERRZ45        45    // IO: Unsigned integer value expected
+#define ERRZ46        46    // IO: Peer has disconnected
+#define ERRZ47        47    // IO: Peer not connected
+#define ERRZ48        48    // IO: Invalid Internet address
 
 // More standard errors
 
-#define ERRZ50		50	// Invalid argument to $STACK()
-#define ERRZ51		51	// Interupt - Control C Received
-#define ERRZ52		52	// Insufficient space to load routine
-#define ERRZ53		53	// Too many tags (max 255)
-#define ERRZ54		54	// Too many lines in routine (max 65535)
-#define ERRZ55		55	// End of linked data reached
-#define ERRZ56		56	// Symbol table full
-#define ERRZ57		57	// Invalid name indirection
-#define ERRZ58		58	// Too many levels of indirection
-#define ERRZ59		59	// Routine version mismatch - please recompile
-#define ERRZ60		60	// Insufficient Global Buffer space
-#define ERRZ61		61	// Database integrity violation found
-#define ERRZ62		62	// Cannot create global - global directory full
-#define ERRZ63		63	// Error in VIEW arguments
-#define ERRZ64		64	// Parameter out of range
-#define ERRZ65		65	// Duplicate tag in routine
-#define ERRZ66		66	// HUP Signal received
-#define ERRZ67		67	// USR1 Signal received
-#define ERRZ68		68	// USR2 Signal received
-#define ERRZ69		69	// Unknown Signal received
-#define ERRZ70		70	// Offset not permitted in entryref
-#define ERRZ71		71	// No such host is known
-#define ERRZ72		72	// Type h_errno error has occured
-#define ERRZ73		73	// Invalid database file specified
-#define ERRZLAST	200	// Must equal last implementation error
+#define ERRZ50        50    // Invalid argument to $STACK()
+#define ERRZ51        51    // Interupt - Control C Received
+#define ERRZ52        52    // Insufficient space to load routine
+#define ERRZ53        53    // Too many tags (max 255)
+#define ERRZ54        54    // Too many lines in routine (max 65535)
+#define ERRZ55        55    // End of linked data reached
+#define ERRZ56        56    // Symbol table full
+#define ERRZ57        57    // Invalid name indirection
+#define ERRZ58        58    // Too many levels of indirection
+#define ERRZ59        59    // Routine version mismatch - please recompile
+#define ERRZ60        60    // Insufficient Global Buffer space
+#define ERRZ61        61    // Database integrity violation found
+#define ERRZ62        62    // Cannot create global - global directory full
+#define ERRZ63        63    // Error in VIEW arguments
+#define ERRZ64        64    // Parameter out of range
+#define ERRZ65        65    // Duplicate tag in routine
+#define ERRZ66        66    // HUP Signal received
+#define ERRZ67        67    // USR1 Signal received
+#define ERRZ68        68    // USR2 Signal received
+#define ERRZ69        69    // Unknown Signal received
+#define ERRZ70        70    // Offset not permitted in entryref
+#define ERRZ71        71    // No such host is known
+#define ERRZ72        72    // Type h_errno error has occured
+#define ERRZ73        73    // Invalid database file specified
+#define ERRZLAST    200    // Must equal last implementation error
 
 // Database dummy errors
 
-#define USRERR		-9999	// they SET $EC="U..."
+#define USRERR        -9999    // they SET $EC="U..."
 
 #endif                                          // !_MUMPS_ERROR_H_

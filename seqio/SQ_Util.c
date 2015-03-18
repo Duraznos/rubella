@@ -66,21 +66,21 @@
 //	SYS	System error	-( "errnum" + ERRMLAST + ERRZLAST );
 //	INT	Internal error	-( "errnum" + ERRMLAST );
 
-int getError (int type, int errnum)
-{ int	err;
+int getError(int type, int errnum) {
+    int err;
 
-  switch ( type )
-  { case SYS:
-      err = errnum + ERRMLAST + ERRZLAST;
-      break;
-    case INT:
-      err = errnum + ERRMLAST;
-      break;
-    default:
-      err = ERRZ20 + ERRMLAST;
-      break;
-  }
-  return ( -err );
+    switch (type) {
+        case SYS:
+            err = errnum + ERRMLAST + ERRZLAST;
+            break;
+        case INT:
+            err = errnum + ERRMLAST;
+            break;
+        default:
+            err = ERRZ20 + ERRMLAST;
+            break;
+    }
+    return (-err);
 }
 
 // ************************************************************************* //
@@ -90,17 +90,17 @@ int getError (int type, int errnum)
 // hence, if a bit has been set, then the signal corresponding to that bit has
 // been caught.
 
-void setSignalBitMask (int sig)
-{ int	mask;
-  if ( sig == SIGQUIT )
-    DoInfo();
+void setSignalBitMask(int sig) {
+    int mask;
+    if (sig == SIGQUIT)
+        DoInfo();
 //  else if ( sig == SIGCHLD )
 //    wait(&mask);
-  else
-  { partab.jobtab->attention = 1;
-    mask = 1 << sig;
-    partab.jobtab->trap |= mask;
-  }
+    else {
+        partab.jobtab->attention = 1;
+        mask = 1 << sig;
+        partab.jobtab->trap |= mask;
+    }
 }
 
 // ************************************************************************* //
@@ -109,37 +109,37 @@ void setSignalBitMask (int sig)
 // Otherwise, a negative integer is returned to indicate the error that has
 // occured.
 
-int seqioSelect (int sid, int type, int tout)
-{ int           	nfds;
-  fd_set        	fds;
-  int           	ret;
-  struct timeval	timeout;
+int seqioSelect(int sid, int type, int tout) {
+    int nfds;
+    fd_set fds;
+    int ret;
+    struct timeval timeout;
 
-  nfds = sid + 1;
-  FD_ZERO ( &fds );
-  FD_SET ( sid, &fds );
-  if ( tout == 0 )
-  { timeout.tv_sec = 0;
-    timeout.tv_usec = 0;
-    if ( type == FDRD ) ret = select ( nfds, &fds, NULL, NULL, &timeout );
-    else ret = select ( nfds, NULL, &fds, NULL, &timeout );
-  }
+    nfds = sid + 1;
+    FD_ZERO(&fds);
+    FD_SET(sid, &fds);
+    if (tout == 0) {
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 0;
+        if (type == FDRD) ret = select(nfds, &fds, NULL, NULL, &timeout);
+        else ret = select(nfds, NULL, &fds, NULL, &timeout);
+    }
 
-  // Time out handled by alarm(), where no alarm() would be set if "tout"
-  // was -1
+        // Time out handled by alarm(), where no alarm() would be set if "tout"
+        // was -1
 
-  else
-  { if ( type == FDRD ) ret = select ( nfds, &fds, NULL, NULL, NULL );
-    else ret = select ( nfds, NULL, &fds, NULL, NULL );
-  }
+    else {
+        if (type == FDRD) ret = select(nfds, &fds, NULL, NULL, NULL);
+        else ret = select(nfds, NULL, &fds, NULL, NULL);
+    }
 
-  // An error has occured ( possibly timed out by alarm() )
+    // An error has occured ( possibly timed out by alarm() )
 
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  else if ( ret == 0 )
-  { ret = raise ( SIGALRM );			// Force select to time out
-    if ( ret == -1 ) return ( getError ( SYS, errno ) );
-    return ( -1 );
-  }
-  else return ( 0 );				// Success
+    if (ret == -1) return (getError(SYS, errno));
+    else if (ret == 0) {
+        ret = raise(SIGALRM);            // Force select to time out
+        if (ret == -1) return (getError(SYS, errno));
+        return (-1);
+    }
+    else return (0);                // Success
 }

@@ -64,30 +64,35 @@
 //		(u_char)	keybuf	the current full key
 //
 
-short Locate(u_char *key)				// find key
-{ int i;						// a handy int
+short Locate(u_char *key)                // find key
+{
+    int i;                        // a handy int
 
-  idx = (u_short *) blk[level]->mem;			// point at the block
-  iidx = (int *) blk[level]->mem;			// point at the block
-  Index = 10;						// start at the start
-  while (TRUE)						// loop
-  { chunk = (cstring *) &iidx[idx[Index]];		// point at the chunk
-    bcopy(&chunk->buf[2], &keybuf[chunk->buf[0]+1],
-	  chunk->buf[1]);				// update the key
-    keybuf[0] = chunk->buf[0] + chunk->buf[1];		// and the size
-    record = (cstring *) &chunk->buf[chunk->buf[1]+2];	// point at the dbc
-    i = UTIL_Key_KeyCmp(&keybuf[1], &key[1], keybuf[0], key[0]); // compare
-    if (i == KEQUAL)					// same?
-    { return 0;						// done
-    }
-    if (i == K2_LESSER)					// passed it?
-    { return -ERRM7;					// no such
-    }
-    Index++;						// point at next
-    if (Index > blk[level]->mem->last_idx)		// passed the end
-    { return -ERRM7;					// no such
-    }
-  }							// end locate loop
+    idx = (u_short *) blk[level]->mem;            // point at the block
+    iidx = (int *) blk[level]->mem;            // point at the block
+    Index = 10;                        // start at the start
+    while (TRUE)                        // loop
+    {
+        chunk = (cstring * ) & iidx[idx[Index]];        // point at the chunk
+        bcopy(&chunk->buf[2], &keybuf[chunk->buf[0] + 1],
+                chunk->buf[1]);                // update the key
+        keybuf[0] = chunk->buf[0] + chunk->buf[1];        // and the size
+        record = (cstring * ) & chunk->buf[chunk->buf[1] + 2];    // point at the dbc
+        i = UTIL_Key_KeyCmp(&keybuf[1], &key[1], keybuf[0], key[0]); // compare
+        if (i == KEQUAL)                    // same?
+        {
+            return 0;                        // done
+        }
+        if (i == K2_LESSER)                    // passed it?
+        {
+            return -ERRM7;                    // no such
+        }
+        Index++;                        // point at next
+        if (Index > blk[level]->mem->last_idx)        // passed the end
+        {
+            return -ERRM7;                    // no such
+        }
+    }                            // end locate loop
 }
 
 //-----------------------------------------------------------------------------
@@ -100,27 +105,31 @@ short Locate(u_char *key)				// find key
 //	     External vars setup as for Locate() above.
 //
 
-short Locate_next()					// point at next key
-{ int i;						// a handy int
-  short s;						// function returns
+short Locate_next()                    // point at next key
+{
+    int i;                        // a handy int
+    short s;                        // function returns
 
-  Index++;						// point at next
-  if (Index > blk[level]->mem->last_idx)		// passed end?
-  { if (!blk[level]->mem->right_ptr)			// any more there?
-    { return -ERRM7;					// no, just exit
-    }
-    i = blk[level]->mem->right_ptr;			// get right block#
-    s = Get_block(i);					// attempt to get it
-    if (s < 0)                                        	// if we got an error
-    { return s;                                       	// return it
-    }
-  }							// end new block
+    Index++;                        // point at next
+    if (Index > blk[level]->mem->last_idx)        // passed end?
+    {
+        if (!blk[level]->mem->right_ptr)            // any more there?
+        {
+            return -ERRM7;                    // no, just exit
+        }
+        i = blk[level]->mem->right_ptr;            // get right block#
+        s = Get_block(i);                    // attempt to get it
+        if (s < 0)                                            // if we got an error
+        {
+            return s;                                        // return it
+        }
+    }                            // end new block
 
-  chunk = (cstring *) &iidx[idx[Index]];		// point at the chunk
-  bcopy(&chunk->buf[2], &keybuf[chunk->buf[0]+1],
-	chunk->buf[1]);					// update the key
-  keybuf[0] = chunk->buf[0] + chunk->buf[1];		// and the size
-  record = (cstring *) &chunk->buf[chunk->buf[1]+2];	// point at the dbc
-  return 0;						// all done
+    chunk = (cstring * ) & iidx[idx[Index]];        // point at the chunk
+    bcopy(&chunk->buf[2], &keybuf[chunk->buf[0] + 1],
+            chunk->buf[1]);                    // update the key
+    keybuf[0] = chunk->buf[0] + chunk->buf[1];        // and the size
+    record = (cstring * ) & chunk->buf[chunk->buf[1] + 2];    // point at the dbc
+    return 0;                        // all done
 }
 

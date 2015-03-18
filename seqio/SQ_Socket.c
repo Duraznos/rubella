@@ -55,15 +55,21 @@
 #include	"error.h"
 #include	"seqio.h"
 
-#define		BACKLOG		3		// Connections to queue
+#define        BACKLOG        3        // Connections to queue
 
-int SQ_Socket_Create ( int nonblock );
-int SQ_Socket_Bind ( int sid, u_short port );
-int SQ_Socket_Listen ( int sid );
-int SQ_Socket_Accept ( int sid, int tout );
-int SQ_Socket_Connect ( int sid, char *addr, u_short port );
-int SQ_Socket_Write ( int sid, u_char *writebuf, int nbytes );
-int SQ_Socket_Read ( int sid, u_char *readbuf, int tout );
+int SQ_Socket_Create(int nonblock);
+
+int SQ_Socket_Bind(int sid, u_short port);
+
+int SQ_Socket_Listen(int sid);
+
+int SQ_Socket_Accept(int sid, int tout);
+
+int SQ_Socket_Connect(int sid, char *addr, u_short port);
+
+int SQ_Socket_Write(int sid, u_char *writebuf, int nbytes);
+
+int SQ_Socket_Read(int sid, u_char *readbuf, int tout);
 
 
 // ************************************************************************* //
@@ -79,28 +85,28 @@ int SQ_Socket_Read ( int sid, u_char *readbuf, int tout );
 //
 // NOTE, that the socket is marked as non-blocking.
 
-int SQ_Socket_Create (int nonblock)
-{ int	sid;
-  int	flag;
-  int	ret;
+int SQ_Socket_Create(int nonblock) {
+    int sid;
+    int flag;
+    int ret;
 
-  sid = socket ( PF_INET, SOCK_STREAM, 0 );
-  if ( sid == -1 ) return ( getError ( SYS, errno ) );
+    sid = socket(PF_INET, SOCK_STREAM, 0);
+    if (sid == -1) return (getError(SYS, errno));
 
-  if (nonblock)
-  { flag = fcntl ( sid, F_GETFL, 0 );
-    if ( flag == -1 )
-    { (void) close ( sid );
-      return ( getError ( SYS, errno ) );
+    if (nonblock) {
+        flag = fcntl(sid, F_GETFL, 0);
+        if (flag == -1) {
+            (void) close(sid);
+            return (getError(SYS, errno));
+        }
+        flag |= O_NONBLOCK;
+        ret = fcntl(sid, F_SETFL, flag);
+        if (ret == -1) {
+            (void) close(sid);
+            return (getError(SYS, errno));
+        }
     }
-    flag |= O_NONBLOCK;
-    ret = fcntl ( sid, F_SETFL, flag );
-    if ( ret == -1 )
-    { (void) close ( sid );
-      return ( getError ( SYS, errno ) );
-    }
-  }
-  return ( sid );
+    return (sid);
 }
 
 // ************************************************************************* //
@@ -108,16 +114,16 @@ int SQ_Socket_Create (int nonblock)
 // successful, 0 is returned.  Otherwise, a negative integer value is returned
 // to indicate the error that has occured.
 
-int SQ_Socket_Bind (int sid, u_short port)
-{ int			ret;
-  struct sockaddr_in	sin;
+int SQ_Socket_Bind(int sid, u_short port) {
+    int ret;
+    struct sockaddr_in sin;
 
-  sin.sin_family = AF_INET;
-  sin.sin_port = htons ( port );
-  sin.sin_addr.s_addr = INADDR_ANY;
-  ret = bind ( sid, ( struct sockaddr * ) &sin, sizeof ( sin ) );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  return ( 0 );
+    sin.sin_family = AF_INET;
+    sin.sin_port = htons(port);
+    sin.sin_addr.s_addr = INADDR_ANY;
+    ret = bind(sid, (struct sockaddr *) &sin, sizeof(sin));
+    if (ret == -1) return (getError(SYS, errno));
+    return (0);
 }
 
 // ************************************************************************* //
@@ -125,12 +131,12 @@ int SQ_Socket_Bind (int sid, u_short port)
 // successful, it returns 0.  Otherwise, it returns a negative integer value to
 // indicate the error that has occured.
 
-int SQ_Socket_Listen (int sid)
-{ int	ret;
+int SQ_Socket_Listen(int sid) {
+    int ret;
 
-  ret = listen ( sid, BACKLOG );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  return ( 0 );
+    ret = listen(sid, BACKLOG);
+    if (ret == -1) return (getError(SYS, errno));
+    return (0);
 }
 
 // ************************************************************************* //
@@ -139,17 +145,17 @@ int SQ_Socket_Listen (int sid)
 // Otherwise, it returns a negative integer value to indicate the error that has
 // occured.
 
-int SQ_Socket_Accept (int sid, int tout)
-{ int			ret;
-  int			len;
-  struct sockaddr_in	addr;
+int SQ_Socket_Accept(int sid, int tout) {
+    int ret;
+    int len;
+    struct sockaddr_in addr;
 
-  ret = seqioSelect ( sid, FDRD, tout );
-  if ( ret < 0 ) return ( ret );
-  len = sizeof ( struct sockaddr_in );
-  ret = accept ( sid, ( struct sockaddr * ) &addr, (socklen_t *)&len );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  return ( ret );
+    ret = seqioSelect(sid, FDRD, tout);
+    if (ret < 0) return (ret);
+    len = sizeof(struct sockaddr_in);
+    ret = accept(sid, (struct sockaddr *) &addr, (socklen_t * ) & len);
+    if (ret == -1) return (getError(SYS, errno));
+    return (ret);
 }
 
 // ************************************************************************* //
@@ -158,26 +164,26 @@ int SQ_Socket_Accept (int sid, int tout)
 // the connection succeeds, 0 is returned.  Otherwise, a negative integer value
 // is returned to indicate the error that has occured.
 
-int SQ_Socket_Connect (int sid, char *addr, u_short port)
-{ int			ret;
-  struct in_addr	inaddr;
-  struct sockaddr_in	sin;
+int SQ_Socket_Connect(int sid, char *addr, u_short port) {
+    int ret;
+    struct in_addr inaddr;
+    struct sockaddr_in sin;
 
-  sin.sin_family = AF_INET;
-  sin.sin_port = htons ( port );
-  ret = inet_aton ( addr, &inaddr );
-  if ( ret == 0 ) return ( getError ( INT, ERRZ48 ) );
-  sin.sin_addr.s_addr = inaddr.s_addr;
-  ret = connect ( sid, ( struct sockaddr * ) &sin, sizeof ( sin ) );
-  if ( ret == -1 )
-  { if ( errno == EINPROGRESS )
-    { ret = seqioSelect ( sid, FDWR, -1 );
-      if ( ret < 0 ) return ( ret );
-      return ( sid );
+    sin.sin_family = AF_INET;
+    sin.sin_port = htons(port);
+    ret = inet_aton(addr, &inaddr);
+    if (ret == 0) return (getError(INT, ERRZ48));
+    sin.sin_addr.s_addr = inaddr.s_addr;
+    ret = connect(sid, (struct sockaddr *) &sin, sizeof(sin));
+    if (ret == -1) {
+        if (errno == EINPROGRESS) {
+            ret = seqioSelect(sid, FDWR, -1);
+            if (ret < 0) return (ret);
+            return (sid);
+        }
+        return (getError(SYS, errno));
     }
-    return ( getError ( SYS, errno ) );
-  }
-  return ( sid );
+    return (sid);
 }
 
 // ************************************************************************* //
@@ -187,37 +193,37 @@ int SQ_Socket_Connect (int sid, char *addr, u_short port)
 // send will return -1 with errno set to EPIPE.  Otherwise, a negative integer
 // is returned to indicate the error that has occured.
 
-int SQ_Socket_Write (int sid, u_char *writebuf, int nbytes)
-{ int	ret;
+int SQ_Socket_Write(int sid, u_char *writebuf, int nbytes) {
+    int ret;
 
-  ret = send ( sid, writebuf, nbytes, 0 );
-  if ( ret == -1 )
-  { if ( errno == EPIPE ) return ( getError ( INT, ERRZ46 ) );
-    else if ( errno == EAGAIN ) return ( 0 );
-    else return ( getError ( SYS, errno ) );
-  }
-  else return ( ret );
+    ret = send(sid, writebuf, nbytes, 0);
+    if (ret == -1) {
+        if (errno == EPIPE) return (getError(INT, ERRZ46));
+        else if (errno == EAGAIN) return (0);
+        else return (getError(SYS, errno));
+    }
+    else return (ret);
 }
 
 // ************************************************************************* //
 
-int SQ_Socket_Read (int sid, u_char *readbuf, int tout)
-{ int	ret;
+int SQ_Socket_Read(int sid, u_char *readbuf, int tout) {
+    int ret;
 
-  if ( tout != 0 )
-  { ret = seqioSelect ( sid, FDRD, tout );
-    if ( ret < 0 ) return ( ret );
-  }
-  ret = recv ( sid, readbuf, 1, 0 );
-  if ( ret == -1 )
-  { if ( errno == EAGAIN )
-    { ret = raise ( SIGALRM );
-      if ( ret == -1 ) return ( getError ( SYS, errno ) );
+    if (tout != 0) {
+        ret = seqioSelect(sid, FDRD, tout);
+        if (ret < 0) return (ret);
     }
-    return ( getError ( SYS, errno ) );
-  }
-  else if ( ret == 0 )
-    return ( ret );
-  else
-    return ( ret );
+    ret = recv(sid, readbuf, 1, 0);
+    if (ret == -1) {
+        if (errno == EAGAIN) {
+            ret = raise(SIGALRM);
+            if (ret == -1) return (getError(SYS, errno));
+        }
+        return (getError(SYS, errno));
+    }
+    else if (ret == 0)
+        return (ret);
+    else
+        return (ret);
 }

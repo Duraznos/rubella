@@ -37,15 +37,16 @@
 #define _MUMPS_SYMBOL_H_
 
 #define DTBLKSIZE sizeof(ST_depend*)+(sizeof(short)*2)+sizeof(char)
-#define DTMINSIZ 32				// leaves 21 for data
+#define DTMINSIZ 32                // leaves 21 for data
 #define DPBLKSIZE sizeof(u_char)+sizeof(ST_depend *)+sizeof(short)+sizeof(char)
 #define NTBLKSIZE sizeof(ST_newtab *)+2*sizeof(short)+sizeof(short *)+sizeof(ST_locdata *)
 
 struct ST_DATA;                                 // defined below
 typedef struct __attribute__ ((__packed__)) NEW_STACK // define new stack
-{ short type;                                   // type of new
-  short ptr;                                    // ptr to variable
-  struct ST_DATA *data;                         // data address
+{
+    short type;                                   // type of new
+    short ptr;                                    // ptr to variable
+    struct ST_DATA *data;                         // data address
 } new_stack;                                    // end of struct new_stack
 
 //** SYMTAB definitions **
@@ -58,51 +59,55 @@ typedef struct __attribute__ ((__packed__)) NEW_STACK // define new stack
 #define SIZ_KEY_DATA    (32768+256+3)           // for the following
 
 typedef struct __attribute__ ((__packed__)) ST_DEPEND // symbol dependant block
-{ struct ST_DEPEND *deplnk;                     // dependants link
-  u_char keylen;                                // length of key (bytes)
-  u_char bytes[SIZ_KEY_DATA];                   // key bytes then data bytes
+{
+    struct ST_DEPEND *deplnk;                     // dependants link
+    u_char keylen;                                // length of key (bytes)
+    u_char bytes[SIZ_KEY_DATA];                   // key bytes then data bytes
 } ST_depend;                                    // end ST_depend structure
 
 typedef struct __attribute__ ((__packed__)) ST_DATA // symbol data block
-{ ST_depend *deplnk;                            // dependants link
-  short attach;                                 // variable attach count
-  short dbc;                                    // data byte count
-  u_char data[MAX_STR_LEN+1];                   // data bytes
+{
+    ST_depend *deplnk;                            // dependants link
+    short attach;                                 // variable attach count
+    short dbc;                                    // data byte count
+    u_char data[MAX_STR_LEN + 1];                   // data bytes
 } ST_data;                                      // end st_data structure
 #define ST_DEPEND_NULL (ST_depend *) NULL       // define null pointer
 #define ST_DATA_NULL (ST_data *) NULL           // define null pointer
 
 typedef struct __attribute__ ((__packed__)) SYMTAB // define symtab structure
-{ short fwd_link;                               // link to next entry
-  short usage;                                  // usage count
-  struct ST_DATA *data;                         // data block pointer
-  var_u varnam;                                 // variable name union
-} symtab_struct;       				// end symtab structure
+{
+    short fwd_link;                               // link to next entry
+    short usage;                                  // usage count
+    struct ST_DATA *data;                         // data block pointer
+    var_u varnam;                                 // variable name union
+} symtab_struct;                    // end symtab structure
 #define var_q varnam.var_qu                     // shorthand for quadword
 #define var_c varnam.var_cu                     // shorthand for char version
 extern short st_hash[];                         // allocate hashing table
 extern symtab_struct symtab[];                  // and symbol table
 
-typedef struct __attribute__ ((__packed__)) ST_LOCDATA
-{ short stindex;				// location in symtab
-  ST_data *data;				// pointer to data
+typedef struct __attribute__ ((__packed__)) ST_LOCDATA {
+    short stindex;                // location in symtab
+    ST_data *data;                // pointer to data
 } ST_locdata;
 
-typedef struct __attribute__ ((__packed__)) ST_NEWTAB
-{ struct ST_NEWTAB *fwd_link;		// link to another newalltab
-  short count_enn;			// existing non new count
-  short *stindex;				// symtab indexes of enn vars
-  short count_new;			// count of new'd vars
-  ST_locdata *locdata;			// location of var and data
+typedef struct __attribute__ ((__packed__)) ST_NEWTAB {
+    struct ST_NEWTAB *fwd_link;        // link to another newalltab
+    short count_enn;            // existing non new count
+    short *stindex;                // symtab indexes of enn vars
+    short count_new;            // count of new'd vars
+    ST_locdata *locdata;            // location of var and data
 } ST_newtab;
 
 typedef struct __attribute__ ((__packed__)) KEY_STRUCT // start struct KEY
-{ u_char slen;                                  // length of key
-  u_char key[256];                              // the actual key
+{
+    u_char slen;                                  // length of key
+    u_char key[256];                              // the actual key
 } key_s;                                        // have 256 chars
 
 short ST_Locate(chr_q var);                     // locate a var name
-short ST_LocateIdx(int idx);			// locate in symtab by index
+short ST_LocateIdx(int idx);            // locate in symtab by index
 short ST_Create(chr_q var);                     // create and/or locate a var
 
 void ST_RemDp(ST_data *dblk, ST_depend *prev, ST_depend *dp, mvar *mvardr);

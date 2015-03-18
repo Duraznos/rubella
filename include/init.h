@@ -36,21 +36,21 @@
 #ifndef _MUMPS_INIT_H_                          // only do this once
 #define _MUMPS_INIT_H_
 
-#define MAX_GROUPS	32			// max number of unix groups
+#define MAX_GROUPS    32            // max number of unix groups
 
 int INIT_Create_File(int blocks,                // number of blocks
-                     int bsize,                 // block size in bytes
-                     int map,                   // map size in bytes may be 0
-                     char *volnam,              // volume name
-                     char *file);               // file name
-int INIT_Run( char *file,                       // database file
-              char *env,                        // environment (UCI)
-              char *cmd);                       // command
-int INIT_Start( char *file,                     // database
-                int jobs,                       // number of jobs
-                int gmb,                        // mb of global buf
-                int rmb,                        // mb of routine buf
-                int addmb);                     // mb of additional buf
-void ST_Init();					// empty symbol table
+        int bsize,                 // block size in bytes
+        int map,                   // map size in bytes may be 0
+        char *volnam,              // volume name
+        char *file);               // file name
+int INIT_Run(char *file,                       // database file
+        char *env,                        // environment (UCI)
+        char *cmd);                       // command
+int INIT_Start(char *file,                     // database
+        int jobs,                       // number of jobs
+        int gmb,                        // mb of global buf
+        int rmb,                        // mb of routine buf
+        int addmb);                     // mb of additional buf
+void ST_Init();                    // empty symbol table
 
 #endif                                          // !_MUMPS_INIT_H_

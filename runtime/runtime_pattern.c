@@ -32,143 +32,144 @@
 #define DEL '\177'
 
 short pattern(cstring *a, cstring *b);
+
 short patmat(cstring *str, cstring *code);
+
 void pminmax(cstring *str, int *min, int *max);
 
-short patmat(cstring *str, cstring *code)
-{
-  u_char ch = '\0';
-  int i = 0;
-  u_char f ='\0';
-  int j = 0;
-  int group = 0;
-  int x = 0;
-  u_char buf[257] = {'\0'};
-  cstring *tmp;
-  tmp = (cstring *) buf;
+short patmat(cstring *str, cstring *code) {
+    u_char ch = '\0';
+    int i = 0;
+    u_char f = '\0';
+    int j = 0;
+    int group = 0;
+    int x = 0;
+    u_char buf[257] = {'\0'};
+    cstring *tmp;
+    tmp = (cstring *) buf;
     ch = code->buf[x];
-    if ((ch > '9' || ch < '0') && (ch != '.')) {	// if not number or dot
-	return -(ERRM10);				// so bug off with err
-    }							// end if
-    tmp->buf[0] = ch;					// save this char
-    i = 1;				// index into string
-    f = '1';				// 'previous' character
+    if ((ch > '9' || ch < '0') && (ch != '.')) {    // if not number or dot
+        return -(ERRM10);                // so bug off with err
+    }                            // end if
+    tmp->buf[0] = ch;                    // save this char
+    i = 1;                // index into string
+    f = '1';                // 'previous' character
     if (ch == '.') j = 1;
-    else j = 0;				// point flag
-    group = 0;				// grouped pattern match
-    while (++x < code->len) {		// while more to do
+    else j = 0;                // point flag
+    group = 0;                // grouped pattern match
+    while (++x < code->len) {        // while more to do
         ch = code->buf[x];
-	if ((ch >= '0') && (ch <= '9')) { // while more in a string of num's
-	    tmp->buf[i++] = ch;		// copy the number out
-	    f = '1';			// prev char
-	    continue;			// go to next char
-	}				// end if
-	if (ch == '.') {		// dot in pattern
-	    if (j) {			// they have two dots
-		return -(ERRM10);	// bug off with err
-	    }				// end if dot found
-	    j++;			// flag error
-	    tmp->buf[i++] = ch;		// copy the dot
-	    f = '1';			// prev char
-	    continue;			// go to next char
-	}				// end if
-	j = 0;				// flag ok
-	if (ch == NOT) {		// negation of pattern class ?
-	    ch = code->buf[x+1];
-	    if ((ch == '"') || (ch >= 'A' && ch <= 'Z') ||
-	        (ch >= 'a' && ch <= 'z')) {
-		tmp->buf[i++] = NOT;
-	    } else
-		ch = NOT;
-	}
-	if (ch == '"') {
-	    if (f != '1' && f != 'A') {
-		return -(ERRM10);
-	    }
-	    for (;;)
-	    {
-		tmp->buf[i++] = ch;
-		ch = code->buf[++x];
-		if ( x >= code->len) {
-		    return -(ERRM10);
-		}
-		if ((ch == '"') || (ch == DELIM)) {	// to cater for quotes
-		    if ((f = code->buf[x+1]) != '"') {	// inside brackets the
-			ch = DELIM;			// || ch == DELIM was
-			break;				// added
-		    }
-		    x++;
-		}
-	    }
-	    tmp->buf[i++] = ch;
-	    f = '"';
-	    continue;
-	}
-	if (ch == '(') {
-	    if (f != '1') {
-		return -(ERRM10);
-	    }
-	    group++;
-	    f = '(';
-	    tmp->buf[i++] = ch;
-	    continue;
-	}
-	if (group && (ch == ',' || ch == ')')) {
-	    if ((f == '1') || (f == '(')) {
-		return -(ERRM10);
-	    }
-	    if (ch == ',') {
-		f = '(';
-		tmp->buf[i++] = ch;
-		continue;
-	    }
-	    if (ch == ')') {
-		group--;
-		tmp->buf[i++] = ch;
-		continue;
-	    }
-	}
-	if (ch >= 'A' && ch <= 'Z')
-	    ch += 32;			/* lower case conversion */
+        if ((ch >= '0') && (ch <= '9')) { // while more in a string of num's
+            tmp->buf[i++] = ch;        // copy the number out
+            f = '1';            // prev char
+            continue;            // go to next char
+        }                // end if
+        if (ch == '.') {        // dot in pattern
+            if (j) {            // they have two dots
+                return -(ERRM10);    // bug off with err
+            }                // end if dot found
+            j++;            // flag error
+            tmp->buf[i++] = ch;        // copy the dot
+            f = '1';            // prev char
+            continue;            // go to next char
+        }                // end if
+        j = 0;                // flag ok
+        if (ch == NOT) {        // negation of pattern class ?
+            ch = code->buf[x + 1];
+            if ((ch == '"') || (ch >= 'A' && ch <= 'Z') ||
+                    (ch >= 'a' && ch <= 'z')) {
+                tmp->buf[i++] = NOT;
+            } else
+                ch = NOT;
+        }
+        if (ch == '"') {
+            if (f != '1' && f != 'A') {
+                return -(ERRM10);
+            }
+            for (; ;) {
+                tmp->buf[i++] = ch;
+                ch = code->buf[++x];
+                if (x >= code->len) {
+                    return -(ERRM10);
+                }
+                if ((ch == '"') || (ch == DELIM)) {    // to cater for quotes
+                    if ((f = code->buf[x + 1]) != '"') {    // inside brackets the
+                        ch = DELIM;            // || ch == DELIM was
+                        break;                // added
+                    }
+                    x++;
+                }
+            }
+            tmp->buf[i++] = ch;
+            f = '"';
+            continue;
+        }
+        if (ch == '(') {
+            if (f != '1') {
+                return -(ERRM10);
+            }
+            group++;
+            f = '(';
+            tmp->buf[i++] = ch;
+            continue;
+        }
+        if (group && (ch == ',' || ch == ')')) {
+            if ((f == '1') || (f == '(')) {
+                return -(ERRM10);
+            }
+            if (ch == ',') {
+                f = '(';
+                tmp->buf[i++] = ch;
+                continue;
+            }
+            if (ch == ')') {
+                group--;
+                tmp->buf[i++] = ch;
+                continue;
+            }
+        }
+        if (ch >= 'A' && ch <= 'Z')
+            ch += 32;            /* lower case conversion */
 
-	if (ch != 'c' &&
-	    ch != 'n' &&
-	    ch != 'p' &&
-	    ch != 'a' &&
-	    ch != 'l' &&
-	    ch != 'u' &&
-	    ch != 'e')
-	    break;
+        if (ch != 'c' &&
+                ch != 'n' &&
+                ch != 'p' &&
+                ch != 'a' &&
+                ch != 'l' &&
+                ch != 'u' &&
+                ch != 'e')
+            break;
 
-	if ((f != '1') && (f != 'A')) {
-	    return -(ERRM10);
-	}
-	if (j) {
-	    ch -= 32;
-	    j = 0;
-	}
-	tmp->buf[i++] = ch;
-	f = 'A';
+        if ((f != '1') && (f != 'A')) {
+            return -(ERRM10);
+        }
+        if (j) {
+            ch -= 32;
+            j = 0;
+        }
+        tmp->buf[i++] = ch;
+        f = 'A';
 
     }
     if ((f == '1') || group) {
-	return -(ERRM10);
+        return -(ERRM10);
     }
     tmp->buf[i++] = DELIM;
-    tmp->len = i;	// the value of 'i' here is the length of the tmp string
+    tmp->len = i;    // the value of 'i' here is the length of the tmp string
 
-    return pattern (str, tmp);
-}    
+    return pattern(str, tmp);
+}
 
 // ***************************************************************************
 // ***************************************************************************
-void pminmax (str, min, max)   // auxiliary function for grouped pattern match 
+void pminmax(str, min, max)   // auxiliary function for grouped pattern match
 
-        cstring   *str;                         // a pattern 'str'
-        int       *min,                         // the minimum possible length
-                  *max;                         // the maximum possible length
+        cstring *str;                         // a pattern 'str'
+                int *min,                         // the minimum possible length
+                *max;                         // the maximum possible length
 
-{   int     mininc,                             //
+{
+    int mininc,                             //
             maxinc,                             //
             i,                                  //
             ch;                                 //
@@ -179,7 +180,7 @@ void pminmax (str, min, max)   // auxiliary function for grouped pattern match
     maxinc = 0;                                 // variables
     i = 0;                                      // to
     ch = 0;                                     // zero
-    while (i < str->len-1) {                    // while more chars to do
+    while (i < str->len - 1) {                    // while more chars to do
         if (str->buf[i] != '.') {               // scan minimum repeat count
             ch = (str->buf[i++]) - '0';         // convert to int
             while (str->buf[i] >= '0' && str->buf[i] <= '9') { // a valid num
@@ -204,9 +205,9 @@ void pminmax (str, min, max)   // auxiliary function for grouped pattern match
                 ch = 255;                       // use default maximum
             maxinc = ch;                        // set maximum
         }
-                                                // skip pattern codes
+        // skip pattern codes
         if (str->buf[i] == '"') {               // quoted string
-            int     cnt;                        // need a new variable
+            int cnt;                        // need a new variable
 
             cnt = 0;                            // init counter
             while (str->buf[++i] != DELIM)      // while more to do
@@ -215,29 +216,29 @@ void pminmax (str, min, max)   // auxiliary function for grouped pattern match
             maxinc = maxinc * cnt;              // set this maximum
         }                                       //
         if (str->buf[i] == '"') {
-            while (str->buf[++i] != DELIM) ;    //
+            while (str->buf[++i] != DELIM);    //
             i++;                                //
         } else if (str->buf[i] == '(') {        //
-            u_char    temp[257];                //
-            cstring *tmp;			//
-            u_char   *tcur;                     //
-            int     tmin,                       //
+            u_char temp[257];                //
+            cstring *tmp;            //
+            u_char *tcur;                     //
+            int tmin,                       //
                     tmax,                       //
                     Tmin,                       //
                     Tmax;                       //
-            short   i1;                         //
+            short i1;                         //
 
             tmp = (cstring *) temp;             //
             tmin = 255;                         //
             tmax = 0;                           //
-          alternation:;                         //
+            alternation:;                         //
             i1 = 1;                             //
             tcur = tmp->buf;                    //
             while (i1) {                        //
                 ch = str->buf[++i];             //
                 *tcur++ = ch;                   //
                 if (ch == '"')                  //
-                    while ((*tcur++ = str->buf[++i]) != DELIM) ; //
+                    while ((*tcur++ = str->buf[++i]) != DELIM); //
                 if (ch == '(')                  //
                     i1++;                       //
                 if (ch == ')')                  //
@@ -246,8 +247,8 @@ void pminmax (str, min, max)   // auxiliary function for grouped pattern match
                     i1--;                       //
             }                                   //
             *(--tcur) = DELIM;                  //
-            tmp->len = tcur - tmp->buf + 1;	//
-            pminmax (tmp, &Tmin, &Tmax);        //
+            tmp->len = tcur - tmp->buf + 1;    //
+            pminmax(tmp, &Tmin, &Tmax);        //
             if (Tmin < tmin)                    //
                 tmin = Tmin;                    //
             if (Tmax > tmax)                    //
@@ -258,7 +259,7 @@ void pminmax (str, min, max)   // auxiliary function for grouped pattern match
             mininc *= tmin;                     //
             maxinc *= tmax;                     //
         } else                                  //
-            while (str->buf[++i] >= 'A') ;      //
+            while (str->buf[++i] >= 'A');      //
         *min += mininc;                         //
         *max += maxinc;                         //
     }                                           //
@@ -271,105 +272,106 @@ void pminmax (str, min, max)   // auxiliary function for grouped pattern match
 
 // ***************************************************************************
 
-short pattern (cstring *a, cstring *b)		// evaluates a ? b 
-{   short   levels;                     	// depth of stack 
-    int	    patx;                      		// match stack pointer 
-    short   notpatclass;                	// pattern class negation 
+short pattern(cstring *a, cstring *b)        // evaluates a ? b
+{
+    short levels;                        // depth of stack
+    int patx;                            // match stack pointer
+    short notpatclass;                    // pattern class negation
 
-    short   ptrpcd[PATDEPTH],
+    short ptrpcd[PATDEPTH],
             position[PATDEPTH];
 
-    short   mincnt[PATDEPTH],           	// minimum number of matches 
-            maxcnt[PATDEPTH],           	// maximum number of matches 
-            actcnt[PATDEPTH];           	// actual count of matches 
-    short   Pflag,
-            Pchar;                      	// status in alternation 
-    short   altc;                       	// alternation counter 
-    short   altcnt[PATDEPTH];           	// gr.pat.alternation counters 
+    short mincnt[PATDEPTH],            // minimum number of matches
+            maxcnt[PATDEPTH],            // maximum number of matches
+            actcnt[PATDEPTH];            // actual count of matches
+    short Pflag,
+            Pchar;                        // status in alternation
+    short altc;                        // alternation counter
+    short altcnt[PATDEPTH];            // gr.pat.alternation counters
 
     unsigned char gpmin[PATDEPTH][PATDEPTH][255]; // grpd pattern min length's 
 
-    short   gp_position[PATDEPTH][PATDEPTH];    // grpd patt.pos.of substr
+    short gp_position[PATDEPTH][PATDEPTH];    // grpd patt.pos.of substr
 
-    u_char   *ptrtom;                     	// pointer to match code 
-    u_char    patcode;				//
-    int     ch;					//
-    int     i;					//
-    int     x;					//
-    int     y;					//
+    u_char *ptrtom;                        // pointer to match code
+    u_char patcode;                //
+    int ch;                    //
+    int i;                    //
+    int x;                    //
+    int y;                    //
 
 
-    notpatclass = FALSE;                	// pattern class negation 
+    notpatclass = FALSE;                    // pattern class negation
     patx = 0;
     x = 0;
-    while (x < b->len-1) {                 	// get minimum repeat count 
-        mincnt[patx] = 0;               	// default to 0
-        maxcnt[patx] = 255;             	// default to 255
-        altcnt[patx] = (-1);            	//
+    while (x < b->len - 1) {                    // get minimum repeat count
+        mincnt[patx] = 0;                // default to 0
+        maxcnt[patx] = 255;                // default to 255
+        altcnt[patx] = (-1);                //
         if (b->buf[x] != '.') {                 // no "." to start
             ch = (b->buf[x++]) - '0';           // convert to int
             while (b->buf[x] >= '0' && b->buf[x] <= '9') { // more valid nums
-                ch *= 10;               	// decimal shift (times by 10)
+                ch *= 10;                // decimal shift (times by 10)
                 ch += (b->buf[x++]) - '0';      // add the current value
-            }                           	// end while more numbers
-            mincnt[patx] = ch;          	// alter min repeat count
+            }                            // end while more numbers
+            mincnt[patx] = ch;            // alter min repeat count
             if (b->buf[x] != '.')               // if still no dot
-                maxcnt[patx] = ch;      	// max repeat is also set
-        }                               	// end if no "." to start
-                                        	// get maximum repeat count 
+                maxcnt[patx] = ch;        // max repeat is also set
+        }                                // end if no "." to start
+        // get maximum repeat count
         if (b->buf[x] == '.') {                 // we have found a dot
-            x++;                        	// go to next char in str
+            x++;                            // go to next char in str
             if (b->buf[x] >= '0' && b->buf[x] <= '9') { // if a valid number
                 ch = (b->buf[x++]) - '0';       // convert it to INT
                 while (b->buf[x] >= '0' && b->buf[x] <= '9') { // more vld nums
-                    ch *= 10;           	// decimal shift (times by 10)
+                    ch *= 10;            // decimal shift (times by 10)
                     ch += (b->buf[x++]) - '0';  // add the current value
-                }                       	// end while more numbers
-                maxcnt[patx] = ch;      	// set the max repeat count
-            }                           	// end if valid number found
-        }                               	// end if "." found
+                }                        // end while more numbers
+                maxcnt[patx] = ch;        // set the max repeat count
+            }                            // end if valid number found
+        }                                // end if "." found
 
-        if (maxcnt[patx] < mincnt[patx]) { 	// if it got screwed up
-            return -(ERRM10);                 	// just impossible! 
+        if (maxcnt[patx] < mincnt[patx]) {    // if it got screwed up
+            return -(ERRM10);                    // just impossible!
         }
- 
-        ptrpcd[patx] = x;               	// save pos of this pat atom
-        actcnt[patx] = 0;               	// init match count for expr
-        position[patx] = 0;             	// pos of matching string
-						// scan string, ignore if empty 
+
+        ptrpcd[patx] = x;                // save pos of this pat atom
+        actcnt[patx] = 0;                // init match count for expr
+        position[patx] = 0;                // pos of matching string
+        // scan string, ignore if empty
 
         if (b->buf[x] == '"' ||
-           (b->buf[x] == '\'' && b->buf[x+1] == '"')) {	//
-            if (b->buf[++x] == DELIM) {		// when at end of this literal
-                x++;				// move along one pos
-                continue;			// back to start
-            }					//
-            while (b->buf[++x] != DELIM) ;	// while more chars in literal
-            x++;				// move along one pos
-        } else if (b->buf[x] == '(') {		// not literal, but bracketed
-            i = 1;				// init
-            x++;				// increment
-            while (x < b->len) {		// while more to look at
-                ch = b->buf[x];			// look at this char
-                x++;				// increment
-                if (x == b->len) continue;	// don't increment if at end
+                (b->buf[x] == '\'' && b->buf[x + 1] == '"')) {    //
+            if (b->buf[++x] == DELIM) {        // when at end of this literal
+                x++;                // move along one pos
+                continue;            // back to start
+            }                    //
+            while (b->buf[++x] != DELIM);    // while more chars in literal
+            x++;                // move along one pos
+        } else if (b->buf[x] == '(') {        // not literal, but bracketed
+            i = 1;                // init
+            x++;                // increment
+            while (x < b->len) {        // while more to look at
+                ch = b->buf[x];            // look at this char
+                x++;                // increment
+                if (x == b->len) continue;    // don't increment if at end
 
-                if (ch == '"') {		// literal inside brackets
-                    while (b->buf[++x] != DELIM) ;	// go to end of literal
-                }				//
-                if (ch == '(') {		// nested brackets
-                    i++;			// increment nest counter
-                    continue;			// back to start
-                }				//
-                if (ch == ')') {		// a close bracket
-                    i--;			// decrement nest counter
-                    if (i < 1)			// not good if i drops below 1
-                        break;			// bug out
-                }				//
-            }					//
-        } else
-          { while ((b->buf[++x] >= 'A') && (b->buf[x] <= 'z')) ; //replace code
-          }
+                if (ch == '"') {        // literal inside brackets
+                    while (b->buf[++x] != DELIM);    // go to end of literal
+                }                //
+                if (ch == '(') {        // nested brackets
+                    i++;            // increment nest counter
+                    continue;            // back to start
+                }                //
+                if (ch == ')') {        // a close bracket
+                    i--;            // decrement nest counter
+                    if (i < 1)            // not good if i drops below 1
+                        break;            // bug out
+                }                //
+            }                    //
+        } else {
+            while ((b->buf[++x] >= 'A') && (b->buf[x] <= 'z')); //replace code
+        }
 
         if (++patx >= (PATDEPTH - 1)) {
             return -(ERRM10);                 // stack overflow 
@@ -383,9 +385,9 @@ short pattern (cstring *a, cstring *b)		// evaluates a ? b
 
     levels = patx;
     if (b->buf[x - 1] == 'e' &&
-        mincnt[levels - 1] == 0 &&
-        maxcnt[levels - 1] == 255)
-         b->buf[x - 1] = '~';         // frequent spec case: last patt is '.E' 
+            mincnt[levels - 1] == 0 &&
+            maxcnt[levels - 1] == 255)
+        b->buf[x - 1] = '~';         // frequent spec case: last patt is '.E'
     mincnt[levels] = maxcnt[levels] = 1;        // sentinel, does never match 
     actcnt[levels] = 0;
     ptrpcd[levels] = x;                 // (*b==EOL) 
@@ -411,98 +413,96 @@ short pattern (cstring *a, cstring *b)		// evaluates a ? b
                 }
                 if (b->buf[ptrpcd[patx]] == '"')
 
-                return 0;
+                    return 0;
             }
 
-            for (;;)
-            {
+            for (; ;) {
                 ptrtom = &b->buf[ptrpcd[patx]];
                 ch = a->buf[y];
-                for (;;)
-                {
+                for (; ;) {
                     patcode = (*ptrtom++);              // first char
                     if ((notpatclass = (patcode == '\''))) // is it a negation
                         patcode = (*ptrtom++);          // yes -> next char
                     switch (patcode) {                  // we live in an 
-                                                        // ASCII/ISO world !! 
-                    case 'c':                           // control char
-                        if (((ch < SP && ch >= NUL)     // between space & Null
-                             || ch == DEL) != notpatclass) // or delete
-                            goto match;                 // and not a negation
-                        break;
-                    case 'n':                           // numeric
-                        if ((ch <= '9' && ch >= '0') != notpatclass) // 0 <-> 9
-                            goto match;                 // and not a negation
-                        break;
-                    case 'p':                                   // punctuation
-                        if (((ch >= SP && ch <= '/') ||         // if it
-                             (ch >= ':' && ch <= '@') ||        // is in
-                             (ch >= '[' && ch <= '`') ||        // any of
-                             (ch >= '{' && ch <= '~') ||        // these ranges
-                             (ch == '\200')) != notpatclass)    // and not
-                            goto match;                         // a negation
-                        break;
-                    case 'a':                                   // alpha
-                        if (((ch >= 'A' && ch <= 'Z') ||        // A-Z or a-z
-                             (ch >= 'a' && ch <= 'z')) != notpatclass) // and
-                            goto match;                         // not negation
-                        break;
-                    case 'l':                                   // lower case
-                        if ((ch >= 'a' && ch <= 'z') != notpatclass) // a-z and
-                            goto match;                         // not negation
-                        break;
-                    case 'u':                                   // upper case
-                        if ((ch >= 'A' && ch <= 'Z') != notpatclass) // A-Z and
-                            goto match;                         // not negation
-                        break;
-                    case 'e':                                   // any char and
-                        if (!notpatclass)                       // not negation
-                            goto match;
-                        break;
-                    case '"':                           // literal
-                        i = 0;                          // pos in str
-                        while (a->buf[y + i++] == (*ptrtom++)) ;
-                        				// look until mismatch
-                        if ((*--ptrtom) == DELIM) {     // mismatch was DELIM
-                            if (notpatclass)            // if negation
-                                goto nomatch;           // failed to match
-                            x = ptrpcd[patx] + 1;	 // i dont know
-                            while (b->buf[x++] != DELIM) // what to do!
-                                y++;
-                            goto match0;
-                        }
-                        if (notpatclass) {              // if a negation
-                            i--;                        // go back one posi
-                            while (*ptrtom++ != DELIM) { // until DELIM in atom
-                                if (a->buf[y + i++] == EOL) // if it hits EOL
-                                    goto nomatch;       // its no good
-                            }                           // while not DELIM
-                            x = ptrpcd[patx] + 2;       // at DELIM already
-                            while (b->buf[x++] != DELIM) // while patx not at
-                                y++;                    // DELIM, move along
-                            goto match0;                // its ok
-                        }                               // end if a negation
-                        if (a->buf[y + i - 1] == EOL) { // we have reached EOL
-                        }                               // end if reached EOL
-                        goto nomatch;                   // bad luck, not match
+                        // ASCII/ISO world !!
+                        case 'c':                           // control char
+                            if (((ch < SP && ch >= NUL)     // between space & Null
+                                    || ch == DEL) != notpatclass) // or delete
+                                goto match;                 // and not a negation
+                            break;
+                        case 'n':                           // numeric
+                            if ((ch <= '9' && ch >= '0') != notpatclass) // 0 <-> 9
+                                goto match;                 // and not a negation
+                            break;
+                        case 'p':                                   // punctuation
+                            if (((ch >= SP && ch <= '/') ||         // if it
+                                    (ch >= ':' && ch <= '@') ||        // is in
+                                    (ch >= '[' && ch <= '`') ||        // any of
+                                    (ch >= '{' && ch <= '~') ||        // these ranges
+                                    (ch == '\200')) != notpatclass)    // and not
+                                goto match;                         // a negation
+                            break;
+                        case 'a':                                   // alpha
+                            if (((ch >= 'A' && ch <= 'Z') ||        // A-Z or a-z
+                                    (ch >= 'a' && ch <= 'z')) != notpatclass) // and
+                                goto match;                         // not negation
+                            break;
+                        case 'l':                                   // lower case
+                            if ((ch >= 'a' && ch <= 'z') != notpatclass) // a-z and
+                                goto match;                         // not negation
+                            break;
+                        case 'u':                                   // upper case
+                            if ((ch >= 'A' && ch <= 'Z') != notpatclass) // A-Z and
+                                goto match;                         // not negation
+                            break;
+                        case 'e':                                   // any char and
+                            if (!notpatclass)                       // not negation
+                                goto match;
+                            break;
+                        case '"':                           // literal
+                            i = 0;                          // pos in str
+                            while (a->buf[y + i++] == (*ptrtom++));
+                            // look until mismatch
+                            if ((*--ptrtom) == DELIM) {     // mismatch was DELIM
+                                if (notpatclass)            // if negation
+                                    goto nomatch;           // failed to match
+                                x = ptrpcd[patx] + 1;     // i dont know
+                                while (b->buf[x++] != DELIM) // what to do!
+                                    y++;
+                                goto match0;
+                            }
+                            if (notpatclass) {              // if a negation
+                                i--;                        // go back one posi
+                                while (*ptrtom++ != DELIM) { // until DELIM in atom
+                                    if (a->buf[y + i++] == EOL) // if it hits EOL
+                                        goto nomatch;       // its no good
+                                }                           // while not DELIM
+                                x = ptrpcd[patx] + 2;       // at DELIM already
+                                while (b->buf[x++] != DELIM) // while patx not at
+                                    y++;                    // DELIM, move along
+                                goto match0;                // its ok
+                            }                               // end if a negation
+                            if (a->buf[y + i - 1] == EOL) { // we have reached EOL
+                            }                               // end if reached EOL
+                            goto nomatch;                   // bad luck, not match
 
-                    case '~':{                          // '.E' as last atom
+                        case '~': {                          // '.E' as last atom
                             return 1;                 // its ok
                         }
-                    case '(':{                          // grouped patt match
-                            u_char    aaa[256];            // more chars
+                        case '(': {                          // grouped patt match
+                            u_char aaa[256];            // more chars
                             cstring *aa;
-                            u_char    bbb[256];            // more chars
+                            u_char bbb[256];            // more chars
                             cstring *bb;
-                            short   i1;                 // counter
-                            int     min,                // minimums
+                            short i1;                 // counter
+                            int min,                // minimums
                                     max;                // maximums
-                            short   pflag;              // pattern flag
-                            short   pchar;              // pattern char
+                            short pflag;              // pattern flag
+                            short pchar;              // pattern char
 
                             aa = (cstring *) aaa;
                             bb = (cstring *) bbb;
-                            
+
                             if (Pflag) {                // if set
                                 pflag = Pflag;          // save values
                                 pchar = Pchar;          // of both
@@ -515,13 +515,13 @@ short pattern (cstring *a, cstring *b)		// evaluates a ? b
                                     gpmin[patx][altc][1] = 0;
                             }
                             altcnt[patx] = 0;
-                          alternation:;
+                            alternation:;
                             i = 0;
                             i1 = 1;
                             while (i1) {
                                 bb->buf[i] = *ptrtom++;
                                 if (bb->buf[i] == '"') {
-                                  while ((bb->buf[++i]=(*ptrtom++)) != DELIM) ;
+                                    while ((bb->buf[++i] = (*ptrtom++)) != DELIM);
                                 }
                                 if (bb->buf[i] == '(')
                                     i1++;
@@ -532,13 +532,13 @@ short pattern (cstring *a, cstring *b)		// evaluates a ? b
                                 i++;
                             }
                             bb->len = --i;
-                            pminmax (bb, &min, &max);
+                            pminmax(bb, &min, &max);
 
                             if ((i1 = gpmin[patx][altcnt[patx]][actcnt[patx]])
-                                < min)
+                                    < min)
                                 gpmin[patx][altcnt[patx]][actcnt[patx]]
-                                = i1 
-                                = min;
+                                        = i1
+                                        = min;
                             gpmin[patx][altcnt[patx]][actcnt[patx] + 1] = 0;
 
                             if (i1 > max) {
@@ -551,27 +551,26 @@ short pattern (cstring *a, cstring *b)		// evaluates a ? b
 // if number of chars too small, try anyway 
 // to get info for "incomplete" match
 
-			    for ( i = y; i < i1+y; i++)
-			    { if (i >= a->len)
-                                break;
-                              else
-                                aa->buf[i-y] = a->buf[i];
+                            for (i = y; i < i1 + y; i++) {
+                                if (i >= a->len)
+                                    break;
+                                else
+                                    aa->buf[i - y] = a->buf[i];
                             }
                             gp_position[patx][actcnt[patx]] = y; //chg i to y
 
-                            for (;;)
-                            {
-                                aa->len = i-y;
-                                i1 = patmat (aa, bb);
-                                
+                            for (; ;) {
+                                aa->len = i - y;
+                                i1 = patmat(aa, bb);
+
                                 if (i1 == 1) {
-                                 gpmin[patx][altcnt[patx]][actcnt[patx]] = i-y;
-                                 y += i-y;
-                                 goto match0;
+                                    gpmin[patx][altcnt[patx]][actcnt[patx]] = i - y;
+                                    y += i - y;
+                                    goto match0;
                                 }
                                 if (i1 != 0)
                                     return i1;
-				if (i >= a->len) {
+                                if (i >= a->len) {
                                     Pflag = pflag;
                                     Pchar = pchar;
                                     if (*(ptrtom - 1) == ',') {
@@ -580,19 +579,19 @@ short pattern (cstring *a, cstring *b)		// evaluates a ? b
                                     }
                                     return 0;
                                 }
-                                aa->buf[i-y] = a->buf[i];
+                                aa->buf[i - y] = a->buf[i];
                                 i++;
                             }
                         }
-                    default:
-                        goto nomatch;
+                        default:
+                            goto nomatch;
                     }                   // end_switch 
                 }                       // end repeat 
 
 
 // ************* THINGS TO DO IF MATCH AND NO MATCH ******************
 
-              nomatch:;
+                nomatch:;
                 if (patcode == '(') {
                     for (altc = 0; altc <= altcnt[patx]; altc++)
                         gpmin[patx][altc][actcnt[patx]] = 0;
@@ -605,8 +604,8 @@ short pattern (cstring *a, cstring *b)		// evaluates a ? b
                 }
                 do {
                     actcnt[patx] = 0;
-                    if (--patx < 0) {			// stack exhaust
-                       return 0;
+                    if (--patx < 0) {            // stack exhaust
+                        return 0;
                     }
                     if (b->buf[ptrpcd[patx]] == '(') {
                         if (actcnt[patx] >= maxcnt[patx]) {
@@ -619,12 +618,12 @@ short pattern (cstring *a, cstring *b)		// evaluates a ? b
                 y = position[patx];     // try previous patterns again 
 
             }                           // end repeat 
-          match:;                       // match
+            match:;                       // match
             y++;                        // move pointer to next char
-          match0:;                      // no action
+            match0:;                      // no action
         }
         position[patx++] = y;           // pos after last match 
-    }        
+    }
 
     return 0;
 }                                       // end of pattern 

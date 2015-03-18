@@ -43,7 +43,7 @@
 #include	<stdio.h>
 #include	"seqio.h"
 
-void signalHandler ( int sig );
+void signalHandler(int sig);
 
 // ************************************************************************* //
 //									     //
@@ -57,20 +57,20 @@ void signalHandler ( int sig );
 //     calls that have already committed are not restarted, but instead return a
 //     partial success (for example, a short read count).
 
-int setSignal (int sig, int flag)
-{ struct sigaction	action;
-  sigset_t		handlermask;
-  int			ret;
+int setSignal(int sig, int flag) {
+    struct sigaction action;
+    sigset_t handlermask;
+    int ret;
 
-  sigemptyset ( &handlermask );
-  sigfillset ( &handlermask );
-  action.sa_mask = handlermask;
-  action.sa_flags = 0;
-  if ( flag == CATCH ) action.sa_handler = signalHandler;
-  else action.sa_handler = SIG_IGN;
-  ret = sigaction ( sig, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  return ( ret );
+    sigemptyset(&handlermask);
+    sigfillset(&handlermask);
+    action.sa_mask = handlermask;
+    action.sa_flags = 0;
+    if (flag == CATCH) action.sa_handler = signalHandler;
+    else action.sa_handler = SIG_IGN;
+    ret = sigaction(sig, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    return (ret);
 }
 
 // ************************************************************************* //
@@ -83,40 +83,40 @@ int setSignal (int sig, int flag)
 //	 read etc ), the operation will exit with -1, with "errno" set to
 //	 EINTR.
 
-int setSignals (void)
-{ struct sigaction	action;			// man 2 sigaction
-  sigset_t		handlermask;		// man 2 sigaction
-  int			ret;			// Return value
+int setSignals(void) {
+    struct sigaction action;            // man 2 sigaction
+    sigset_t handlermask;        // man 2 sigaction
+    int ret;            // Return value
 
-  sigemptyset ( &handlermask );
-  sigfillset ( &handlermask );
-  action.sa_mask = handlermask;
-  action.sa_flags = 0;
-  action.sa_handler = signalHandler;
+    sigemptyset(&handlermask);
+    sigfillset(&handlermask);
+    action.sa_mask = handlermask;
+    action.sa_flags = 0;
+    action.sa_handler = signalHandler;
 
-  action.sa_handler = SIG_IGN;
-  ret = sigaction ( SIGHUP, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  action.sa_handler = signalHandler;
+    action.sa_handler = SIG_IGN;
+    ret = sigaction(SIGHUP, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    action.sa_handler = signalHandler;
 
-  ret = sigaction ( SIGINT, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
+    ret = sigaction(SIGINT, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
 
-  action.sa_flags = SA_RESTART;
-  ret = sigaction ( SIGQUIT, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  action.sa_flags = 0;
+    action.sa_flags = SA_RESTART;
+    ret = sigaction(SIGQUIT, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    action.sa_flags = 0;
 
-  action.sa_handler = SIG_DFL;				// let unix do this one
-  ret = sigaction ( SIGILL, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  action.sa_handler = signalHandler;
+    action.sa_handler = SIG_DFL;                // let unix do this one
+    ret = sigaction(SIGILL, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    action.sa_handler = signalHandler;
 
-  ret = sigaction ( SIGTRAP, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
+    ret = sigaction(SIGTRAP, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
 
-  ret = sigaction ( SIGABRT, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
+    ret = sigaction(SIGABRT, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
 
 #if defined(__FreeBSD__) || defined(__NetBSD__)
   action.sa_handler = SIG_DFL;				// let unix do this one
@@ -125,20 +125,20 @@ int setSignals (void)
   action.sa_handler = signalHandler;
 #endif
 
-  action.sa_handler = SIG_DFL;				// let unix do this one
-  ret = sigaction ( SIGFPE, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  action.sa_handler = signalHandler;
+    action.sa_handler = SIG_DFL;                // let unix do this one
+    ret = sigaction(SIGFPE, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    action.sa_handler = signalHandler;
 
-  action.sa_handler = SIG_DFL;				// let unix do this one
-  ret = sigaction ( SIGBUS, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  action.sa_handler = signalHandler;
+    action.sa_handler = SIG_DFL;                // let unix do this one
+    ret = sigaction(SIGBUS, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    action.sa_handler = signalHandler;
 
-  action.sa_handler = SIG_DFL;				// SIGSEGV is desirable
-  ret = sigaction ( SIGSEGV, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  action.sa_handler = signalHandler;
+    action.sa_handler = SIG_DFL;                // SIGSEGV is desirable
+    ret = sigaction(SIGSEGV, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    action.sa_handler = signalHandler;
 
 #if defined(__FreeBSD__) || defined(__NetBSD__)
   action.sa_handler = SIG_DFL;				// let unix do this one
@@ -147,25 +147,25 @@ int setSignals (void)
   action.sa_handler = signalHandler;
 #endif
 
-  ret = sigaction ( SIGPIPE, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
+    ret = sigaction(SIGPIPE, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
 
-  ret = sigaction ( SIGALRM, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
+    ret = sigaction(SIGALRM, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
 
-  ret = sigaction ( SIGTERM, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
+    ret = sigaction(SIGTERM, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
 
-  ret = sigaction ( SIGURG, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
+    ret = sigaction(SIGURG, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
 
-  ret = sigaction ( SIGTSTP, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
+    ret = sigaction(SIGTSTP, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
 
-  action.sa_handler = SIG_IGN;
-  ret = sigaction ( SIGCONT, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  action.sa_handler = signalHandler;
+    action.sa_handler = SIG_IGN;
+    ret = sigaction(SIGCONT, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    action.sa_handler = signalHandler;
 
 // Setting this to SIG_IGN should stop zombies
 //  action.sa_handler = SIG_IGN;
@@ -173,25 +173,25 @@ int setSignals (void)
 //  if ( ret == -1 ) return ( getError ( SYS, errno ) );
 //  action.sa_handler = signalHandler;
 
-  ret = sigaction ( SIGTTIN, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  ret = sigaction ( SIGTTOU, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  ret = sigaction ( SIGIO, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  ret = sigaction ( SIGXCPU, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  ret = sigaction ( SIGXFSZ, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  ret = sigaction ( SIGVTALRM, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  ret = sigaction ( SIGPROF, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
+    ret = sigaction(SIGTTIN, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    ret = sigaction(SIGTTOU, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    ret = sigaction(SIGIO, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    ret = sigaction(SIGXCPU, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    ret = sigaction(SIGXFSZ, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    ret = sigaction(SIGVTALRM, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    ret = sigaction(SIGPROF, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
 
-  action.sa_handler = SIG_IGN;				// Ignore for now
-  ret = sigaction ( SIGWINCH, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  action.sa_handler = signalHandler;
+    action.sa_handler = SIG_IGN;                // Ignore for now
+    ret = sigaction(SIGWINCH, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    action.sa_handler = signalHandler;
 
 #if defined(__FreeBSD__) || defined(__NetBSD__)
   action.sa_flags = SA_RESTART;
@@ -200,11 +200,11 @@ int setSignals (void)
   action.sa_flags = 0;
 #endif
 
-  ret = sigaction ( SIGUSR1, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  ret = sigaction ( SIGUSR2, &action, NULL );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  return ( 0 );
+    ret = sigaction(SIGUSR1, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    ret = sigaction(SIGUSR2, &action, NULL);
+    if (ret == -1) return (getError(SYS, errno));
+    return (0);
 }
 
 // ************************************************************************* //
@@ -219,6 +219,7 @@ int setSignals (void)
 // Note, refer to the function "setSignalBitMask" in the file
 //	 "/mumps/seqio/SQ_Util.c".
 
-void signalHandler (int sig)				// Caught signal
-{ setSignalBitMask ( sig );
+void signalHandler(int sig)                // Caught signal
+{
+    setSignalBitMask(sig);
 }

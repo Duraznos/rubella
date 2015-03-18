@@ -61,30 +61,30 @@
 // non-negative integer, termed a file descriptor.  Otherwise, a negative
 // integer is returned to indicate the error that has occured.
 
-int SQ_File_Open (char *file, int op)
-{ int	flag;
-  int	fid;
+int SQ_File_Open(char *file, int op) {
+    int flag;
+    int fid;
 
-  switch ( op )
-  { case WRITE:
-      flag = O_WRONLY|O_TRUNC|O_CREAT;
-      break;
-    case READ:
-      flag = O_RDONLY;
-      break;
-    case APPEND:
-      flag = O_WRONLY|O_APPEND|O_CREAT;
-      break;
-    default:
-      return ( getError ( INT, ERRZ21 ) );
-  }
+    switch (op) {
+        case WRITE:
+            flag = O_WRONLY | O_TRUNC | O_CREAT;
+            break;
+        case READ:
+            flag = O_RDONLY;
+            break;
+        case APPEND:
+            flag = O_WRONLY | O_APPEND | O_CREAT;
+            break;
+        default:
+            return (getError(INT, ERRZ21));
+    }
 
-  // I am assuming that MODE will always be ignored, except when the file does
-  // not exist and "op" is either WRITE or APPEND.
+    // I am assuming that MODE will always be ignored, except when the file does
+    // not exist and "op" is either WRITE or APPEND.
 
-  fid = open ( file, flag, MODE );
-  if ( fid == -1 ) return ( getError ( SYS, errno ) );
-  return ( fid );
+    fid = open(file, flag, MODE);
+    if (fid == -1) return (getError(SYS, errno));
+    return (fid);
 }
 
 // ************************************************************************* //
@@ -93,12 +93,12 @@ int SQ_File_Open (char *file, int op)
 // of bytes actually written is returned.  Otherwise, a negative integer is
 // returned to indicate the error that has occured.
 
-int SQ_File_Write (int fid, u_char *writebuf, int nbytes)
-{ int	ret;
+int SQ_File_Write(int fid, u_char *writebuf, int nbytes) {
+    int ret;
 
-  ret = write ( fid, writebuf, nbytes );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  return ( ret );
+    ret = write(fid, writebuf, nbytes);
+    if (ret == -1) return (getError(SYS, errno));
+    return (ret);
 }
 
 // ************************************************************************* //
@@ -107,10 +107,10 @@ int SQ_File_Write (int fid, u_char *writebuf, int nbytes)
 // actually read is returned.  Otherwise, a negative integer is returned to
 // indicate the error that has occured.
 
-int SQ_File_Read (int fid, u_char *readbuf)
-{ int	ret;
+int SQ_File_Read(int fid, u_char *readbuf) {
+    int ret;
 
-  ret = read ( fid, readbuf, 1 );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  else return ( ret );
+    ret = read(fid, readbuf, 1);
+    if (ret == -1) return (getError(SYS, errno));
+    else return (ret);
 }

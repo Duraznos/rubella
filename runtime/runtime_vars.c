@@ -60,104 +60,112 @@
 // $ECODE
 //
 short Vecode(u_char *ret_buffer)                // $ECODE
-{ mvar *var;					// for ST_Get
-  short s;
-  var = (mvar *) ret_buffer;			// use here for the mvar
-  bcopy("$ECODE\0\0", &var->name.var_cu[0], 8);	// get the name
-  var->volset = 0;				// clear volset
-  var->uci = UCI_IS_LOCALVAR;			// local var
-  var->slen = 0;				// no subscripts
-  s =  ST_Get(var, ret_buffer);			// get it
-  if (s == -ERRM6)
-  { s = 0;					// ignore undef
-    ret_buffer[0] = '\0';			// null terminate
-  }
-  return s;
+{
+    mvar *var;                    // for ST_Get
+    short s;
+    var = (mvar *) ret_buffer;            // use here for the mvar
+    bcopy("$ECODE\0\0", &var->name.var_cu[0], 8);    // get the name
+    var->volset = 0;                // clear volset
+    var->uci = UCI_IS_LOCALVAR;            // local var
+    var->slen = 0;                // no subscripts
+    s = ST_Get(var, ret_buffer);            // get it
+    if (s == -ERRM6) {
+        s = 0;                    // ignore undef
+        ret_buffer[0] = '\0';            // null terminate
+    }
+    return s;
 }
 
 //***********************************************************************
 // $ETRAP
 //
 short Vetrap(u_char *ret_buffer)                // $ETRAP
-{ mvar *var;					// for ST_Get
-  short s;
-  var = (mvar *) ret_buffer;			// use here for the mvar
-  bcopy("$ETRAP\0\0", &var->name.var_cu[0], 8);	// get the name
-  var->volset = 0;				// clear volset
-  var->uci = UCI_IS_LOCALVAR;			// local var
-  var->slen = 0;				// no subscripts
-  s = ST_Get(var, ret_buffer);			// exit with result
-  if (s == -ERRM6) s = 0;			// ignore undef
-  return s;
+{
+    mvar *var;                    // for ST_Get
+    short s;
+    var = (mvar *) ret_buffer;            // use here for the mvar
+    bcopy("$ETRAP\0\0", &var->name.var_cu[0], 8);    // get the name
+    var->volset = 0;                // clear volset
+    var->uci = UCI_IS_LOCALVAR;            // local var
+    var->slen = 0;                // no subscripts
+    s = ST_Get(var, ret_buffer);            // exit with result
+    if (s == -ERRM6) s = 0;            // ignore undef
+    return s;
 }
 
 //***********************************************************************
 // $HOROLOG
 //
 short Vhorolog(u_char *ret_buffer)              // $HOROLOG
-{ time_t sec = time(NULL);                      // get secs from 1 Jan 1970 UTC
-  struct tm *buf;                               // struct for localtime()
-  int day;                                      // number of days
-  buf = localtime(&sec);                        // get GMT-localtime
+{
+    time_t sec = time(NULL);                      // get secs from 1 Jan 1970 UTC
+    struct tm *buf;                               // struct for localtime()
+    int day;                                      // number of days
+    buf = localtime(&sec);                        // get GMT-localtime
 #if !defined __CYGWIN__ && !defined __sun__
-  sec = sec + buf->tm_gmtoff;                   // adjust to local
+    sec = sec + buf->tm_gmtoff;                   // adjust to local
 #endif
-  day = sec/SECDAY+YRADJ;                       // get number of days
-  sec = sec%SECDAY;                             // and number of seconds
-  return sprintf( (char *)ret_buffer, "%d,%d", day, (int) sec); // return count and $H
+    day = sec / SECDAY + YRADJ;                       // get number of days
+    sec = sec % SECDAY;                             // and number of seconds
+    return sprintf((char *) ret_buffer, "%d,%d", day, (int) sec); // return count and $H
 }
 
 //***********************************************************************
 // $KEY
 //
 short Vkey(u_char *ret_buffer)                  // $KEY
-{ SQ_Chan *ioptr;				// ptr to current $IO
-  ioptr = &partab.jobtab->seqio[(int) partab.jobtab->io]; // point at it
-  return mcopy( &ioptr->dkey[0],		// copy from here
-                ret_buffer,                     // to here
-		ioptr->dkey_len);		// this many bytes
+{
+    SQ_Chan *ioptr;                // ptr to current $IO
+    ioptr = &partab.jobtab->seqio[(int) partab.jobtab->io]; // point at it
+    return mcopy(&ioptr->dkey[0],        // copy from here
+            ret_buffer,                     // to here
+            ioptr->dkey_len);        // this many bytes
 }
 
 //***********************************************************************
 // $REFERENCE
 //
 short Vreference(u_char *ret_buffer)            // $REFERENCE
-{ mvar *var;					// variable pointer
-  var = &partab.jobtab->last_ref;		// point at $R
-  ret_buffer[0] = '\0';				// null JIC
-  if (var->name.var_cu[0] == '\0') return 0;	// return null string if null
-  return UTIL_String_Mvar(var, ret_buffer, 32767); // do it elsewhere
+{
+    mvar *var;                    // variable pointer
+    var = &partab.jobtab->last_ref;        // point at $R
+    ret_buffer[0] = '\0';                // null JIC
+    if (var->name.var_cu[0] == '\0') return 0;    // return null string if null
+    return UTIL_String_Mvar(var, ret_buffer, 32767); // do it elsewhere
 }
 
 //***********************************************************************
 // $SYSTEM
 //
 short Vsystem(u_char *ret_buffer)               // $SYSTEM
-{ int i;                                        // to copy value
-  i = itocstring( ret_buffer, MUMPS_SYSTEM); 	// copy assigned #
-  ret_buffer[i++] = ',';                        // and a comma
-  i = i + mumps_version(&ret_buffer[i]);        // do it elsewhere
-  return i;                                     // return the count
+{
+    int i;                                        // to copy value
+    i = itocstring(ret_buffer, MUMPS_SYSTEM);    // copy assigned #
+    ret_buffer[i++] = ',';                        // and a comma
+    i = i + mumps_version(&ret_buffer[i]);        // do it elsewhere
+    return i;                                     // return the count
 }
 
 //***********************************************************************
 // $X
 //
 short Vx(u_char *ret_buffer)                    // $X
-{ SQ_Chan *ioptr;				// ptr to current $IO
-  ioptr = &partab.jobtab->seqio[(int) partab.jobtab->io]; // point at it
-  return itocstring( ret_buffer,
-  		  ioptr->dx);			// return len with data in buf
+{
+    SQ_Chan *ioptr;                // ptr to current $IO
+    ioptr = &partab.jobtab->seqio[(int) partab.jobtab->io]; // point at it
+    return itocstring(ret_buffer,
+            ioptr->dx);            // return len with data in buf
 }
 
 //***********************************************************************
 // $Y
 //
 short Vy(u_char *ret_buffer)                    // $Y
-{ SQ_Chan *ioptr;				// ptr to current $IO
-  ioptr = &partab.jobtab->seqio[(int) partab.jobtab->io]; // point at it
-  return itocstring( ret_buffer,
-  		  ioptr->dy);			// return len with data in buf
+{
+    SQ_Chan *ioptr;                // ptr to current $IO
+    ioptr = &partab.jobtab->seqio[(int) partab.jobtab->io]; // point at it
+    return itocstring(ret_buffer,
+            ioptr->dy);            // return len with data in buf
 }
 
 //***********************************************************************
@@ -168,54 +176,62 @@ short Vy(u_char *ret_buffer)                    // $Y
 //	$X
 //	$Y
 
-short Vset(mvar *var, cstring *cptr)		// set a special variable
-{ int i;
-  if (var->slen != 0) return -ERRM8;		// no subscripts permitted
-  if ((strncasecmp( (char *)&var->name.var_cu[1], "ec", 2) == 0) ||
-      (strncasecmp( (char *)&var->name.var_cu[1], "ecode", 5) == 0)) // $EC[ODE]
-  { if ((cptr->len > 1) && (cptr->buf[0] == ',')    // If it starts with a comma
-        && (cptr->buf[cptr->len - 1] == ','))        // and ends with a comma
-    {  cptr->len--;
-       bcopy(&cptr->buf[1], &cptr->buf[0], cptr->len--);  // Ignore the commas
-       cptr->buf[cptr->len] = '\0';                     // and nul terminate
+short Vset(mvar *var, cstring *cptr)        // set a special variable
+{
+    int i;
+    if (var->slen != 0) return -ERRM8;        // no subscripts permitted
+    if ((strncasecmp((char *) &var->name.var_cu[1], "ec", 2) == 0) ||
+            (strncasecmp((char *) &var->name.var_cu[1], "ecode", 5) == 0)) // $EC[ODE]
+    {
+        if ((cptr->len > 1) && (cptr->buf[0] == ',')    // If it starts with a comma
+                && (cptr->buf[cptr->len - 1] == ','))        // and ends with a comma
+        {
+            cptr->len--;
+            bcopy(&cptr->buf[1], &cptr->buf[0], cptr->len--);  // Ignore the commas
+            cptr->buf[cptr->len] = '\0';                     // and nul terminate
+        }
+        if ((cptr->len == 0) ||            // set to null ok
+                (cptr->buf[0] == 'U'))            // or Uanything
+        {
+            bcopy("$ECODE\0\0", &var->name.var_cu[0], 8); // ensure name correct
+            partab.jobtab->error_frame = 0;        // and where the error happened
+            partab.jobtab->etrap_at = 0;        // not required
+            if (cptr->len == 0)            // if we are clearing it
+                return ST_Kill(var);            // kill it
+            return USRERR;                // do it elsewhere
+        }
+        return -ERRM101;                // can't do that
     }
-    if ((cptr->len == 0) ||			// set to null ok
-	(cptr->buf[0] == 'U'))			// or Uanything
-    { bcopy("$ECODE\0\0", &var->name.var_cu[0], 8); // ensure name correct
-      partab.jobtab->error_frame = 0;		// and where the error happened
-      partab.jobtab->etrap_at = 0;		// not required
-      if (cptr->len == 0)			// if we are clearing it
-        return ST_Kill(var);			// kill it
-      return USRERR;				// do it elsewhere
+    if ((strncasecmp((char *) &var->name.var_cu[1], "et", 2) == 0) ||
+            (strncasecmp((char *) &var->name.var_cu[1], "etrap", 5) == 0)) // $ET[RAP]
+    {
+        bcopy("$ETRAP\0\0", &var->name.var_cu[0], 8); // ensure name correct
+        if (cptr->len == 0) return ST_Kill(var);    // kill it
+        return ST_Set(var, cptr);            // do it in symbol
     }
-    return -ERRM101;				// can't do that
-  }
-  if ((strncasecmp( (char *)&var->name.var_cu[1], "et", 2) == 0) ||
-      (strncasecmp( (char *)&var->name.var_cu[1], "etrap", 5) == 0)) // $ET[RAP]
-  { bcopy("$ETRAP\0\0", &var->name.var_cu[0], 8); // ensure name correct
-    if (cptr->len == 0) return ST_Kill(var);	// kill it
-    return ST_Set(var, cptr);			// do it in symbol
-  }
-  if ((strncasecmp( (char *)&var->name.var_cu[1], "k", 1) == 0) ||
-      (strncasecmp( (char *)&var->name.var_cu[1], "key", 3) == 0)) // $K[EY]
-  { if (cptr->len > MAX_DKEY_LEN) return -ERRM75; // too big
-    bcopy(cptr->buf,				// copy this
-	  partab.jobtab->seqio[partab.jobtab->io].dkey, // to here
-	  cptr->len+1);				// this many (incl null)
-    partab.jobtab->seqio[partab.jobtab->io].dkey_len = cptr->len;
-    return 0;
-  }
-  if (strncasecmp( (char *)&var->name.var_cu[1], "x", 1) == 0)	// $X
-  { i = cstringtoi(cptr);			// get val
-    if (i < 0) i = 0;
-    partab.jobtab->seqio[partab.jobtab->io].dx = (u_short) i;
-    return 0;					// and return
-  }
-  if (strncasecmp( (char *)&var->name.var_cu[1], "y", 1) == 0)	// $Y
-  { i = cstringtoi(cptr);			// get val
-    if (i < 0) i = 0;
-    partab.jobtab->seqio[partab.jobtab->io].dy = (u_short) i;
-    return 0;					// and return
-  }
-  return -ERRM8;				// else junk
+    if ((strncasecmp((char *) &var->name.var_cu[1], "k", 1) == 0) ||
+            (strncasecmp((char *) &var->name.var_cu[1], "key", 3) == 0)) // $K[EY]
+    {
+        if (cptr->len > MAX_DKEY_LEN) return -ERRM75; // too big
+        bcopy(cptr->buf,                // copy this
+                partab.jobtab->seqio[partab.jobtab->io].dkey, // to here
+                cptr->len + 1);                // this many (incl null)
+        partab.jobtab->seqio[partab.jobtab->io].dkey_len = cptr->len;
+        return 0;
+    }
+    if (strncasecmp((char *) &var->name.var_cu[1], "x", 1) == 0)    // $X
+    {
+        i = cstringtoi(cptr);            // get val
+        if (i < 0) i = 0;
+        partab.jobtab->seqio[partab.jobtab->io].dx = (u_short) i;
+        return 0;                    // and return
+    }
+    if (strncasecmp((char *) &var->name.var_cu[1], "y", 1) == 0)    // $Y
+    {
+        i = cstringtoi(cptr);            // get val
+        if (i < 0) i = 0;
+        partab.jobtab->seqio[partab.jobtab->io].dy = (u_short) i;
+        return 0;                    // and return
+    }
+    return -ERRM8;                // else junk
 }

@@ -49,7 +49,7 @@
 #include	"error.h"
 #include	"seqio.h"
 
-int SQ_Device_Read_TTY ( int fid, u_char *buf, int tout );
+int SQ_Device_Read_TTY(int fid, u_char *buf, int tout);
 
 // ************************************************************************* //
 //									     //
@@ -63,44 +63,44 @@ int SQ_Device_Read_TTY ( int fid, u_char *buf, int tout );
 // non-negative integer, termed a descriptor.  Otherwise, it returns a negative
 // integer to indicate the error that has occured.
 
-int SQ_Device_Open (char *device, int op)
-{	int	flag;
-	int	did;
+int SQ_Device_Open(char *device, int op) {
+    int flag;
+    int did;
 
-  switch ( op )
-  {
-    case WRITE:
-      flag = O_WRONLY;
-      break;
-    case READ:
-      flag = O_RDONLY;
-      break;
-    case IO:
-      flag = O_RDWR;
-      break;
-    default:
-      return ( getError ( INT, ERRZ21 ) );
-  }
+    switch (op) {
+        case WRITE:
+            flag = O_WRONLY;
+            break;
+        case READ:
+            flag = O_RDONLY;
+            break;
+        case IO:
+            flag = O_RDWR;
+            break;
+        default:
+            return (getError(INT, ERRZ21));
+    }
 
 // If device is busy, keep trying until a timeout ( ie alarm signal ) has been
 // received
 
-  while ( 1 )
-  { did = open ( device, flag, 0 );
-    if ( did == -1 )
-    { if ( errno != EBUSY )
-      { return ( getError ( SYS, errno ) );
-      }
+    while (1) {
+        did = open(device, flag, 0);
+        if (did == -1) {
+            if (errno != EBUSY) {
+                return (getError(SYS, errno));
+            }
 //      else if (partab.jobtab->trap |= 16384)		// MASK[SIGALRM]
-      else if (partab.jobtab->trap | 16384)             // MASK[SIGALRM]
-      { return (-1);
-      }
-    }
-    else
-    { return ( did );
-    }
-  }							// end while (1)
-  return ( getError ( INT, ERRZ20 ) );
+            else if (partab.jobtab->trap | 16384)             // MASK[SIGALRM]
+            {
+                return (-1);
+            }
+        }
+        else {
+            return (did);
+        }
+    }                            // end while (1)
+    return (getError(INT, ERRZ20));
 }
 
 // ************************************************************************* //
@@ -109,11 +109,11 @@ int SQ_Device_Open (char *device, int op)
 // of bytes actually written is returned.  Otherwise, it returns a negative
 // integer to indicate the error that has occured.
 
-int SQ_Device_Write (int did, u_char *writebuf, int nbytes)
-{ int	ret;
-  ret = write ( did, writebuf, nbytes );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  return ( ret );
+int SQ_Device_Write(int did, u_char *writebuf, int nbytes) {
+    int ret;
+    ret = write(did, writebuf, nbytes);
+    if (ret == -1) return (getError(SYS, errno));
+    return (ret);
 }
 
 // ************************************************************************* //
@@ -123,11 +123,11 @@ int SQ_Device_Write (int did, u_char *writebuf, int nbytes)
 //
 // Note, support is only implemented for terminal type devices.
 
-int SQ_Device_Read (int did, u_char *readbuf, int tout)
-{ int	ret;
-  ret = isatty ( did );
-  if ( ret == 1 ) return ( SQ_Device_Read_TTY ( did, readbuf, tout ) );
-  else return ( getError ( INT, ERRZ24 ) );
+int SQ_Device_Read(int did, u_char *readbuf, int tout) {
+    int ret;
+    ret = isatty(did);
+    if (ret == 1) return (SQ_Device_Read_TTY(did, readbuf, tout));
+    else return (getError(INT, ERRZ24));
 }
 
 // ************************************************************************* //
@@ -143,38 +143,39 @@ int SQ_Device_Read (int did, u_char *readbuf, int tout)
 // completion, the number of bytes actually read is returned.  Otherwise, a
 // negative integer is returned to indicate the error that has occured.
 
-int SQ_Device_Read_TTY (int did, u_char *readbuf, int tout)
-{ struct termios		settings;
-  int		ret;
-  int		rret;
+int SQ_Device_Read_TTY(int did, u_char *readbuf, int tout) {
+    struct termios settings;
+    int ret;
+    int rret;
 
-  if ( tout == 0 )
-  { ret = tcgetattr ( did, &settings );
-    if ( ret == -1 ) return ( getError ( SYS, errno ) );
-    settings.c_cc[VMIN] = 0;
-    ret = tcsetattr ( did, TCSANOW, &settings );
-    if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  }
-  rret = read ( did, readbuf, 1 );
-  if ( tout == 0 )
-  { ret = tcgetattr ( did, &settings );
-    if ( ret == -1 ) return ( getError ( SYS, errno ) );
-    settings.c_cc[VMIN] = 1;
-    ret = tcsetattr ( did, TCSANOW, &settings );
-    if ( ret == -1 ) return ( getError ( SYS, errno ) );
-    if (rret == 0)				// zero timeout and no chars
-    { partab.jobtab->trap |= 16384;		// MASK[SIGALRM]
-      return (-1);
+    if (tout == 0) {
+        ret = tcgetattr(did, &settings);
+        if (ret == -1) return (getError(SYS, errno));
+        settings.c_cc[VMIN] = 0;
+        ret = tcsetattr(did, TCSANOW, &settings);
+        if (ret == -1) return (getError(SYS, errno));
     }
-  } 
-  if ( rret == -1 )
-  { if ( errno == EAGAIN )
-    { ret = raise ( SIGALRM );
-      if ( ret == -1 ) return ( getError ( SYS, errno ) );
+    rret = read(did, readbuf, 1);
+    if (tout == 0) {
+        ret = tcgetattr(did, &settings);
+        if (ret == -1) return (getError(SYS, errno));
+        settings.c_cc[VMIN] = 1;
+        ret = tcsetattr(did, TCSANOW, &settings);
+        if (ret == -1) return (getError(SYS, errno));
+        if (rret == 0)                // zero timeout and no chars
+        {
+            partab.jobtab->trap |= 16384;        // MASK[SIGALRM]
+            return (-1);
+        }
     }
-    return ( getError ( SYS, errno ) );
-  }
-  else
-  { return ( rret );
-  }
+    if (rret == -1) {
+        if (errno == EAGAIN) {
+            ret = raise(SIGALRM);
+            if (ret == -1) return (getError(SYS, errno));
+        }
+        return (getError(SYS, errno));
+    }
+    else {
+        return (rret);
+    }
 }

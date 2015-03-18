@@ -51,7 +51,7 @@
 #include	"error.h"
 #include	"seqio.h"
 
-int createPipe ( char *pipe );
+int createPipe(char *pipe);
 
 // ************************************************************************* //
 //									     //
@@ -73,26 +73,26 @@ int createPipe ( char *pipe );
 // descriptor.  Otherwise, a negative integer value is returned to indicate the
 // error that has occured.
 
-int SQ_Pipe_Open (char *pipe, int op)
-{ int	ret;
-  int	flag;
-  int	pid;
+int SQ_Pipe_Open(char *pipe, int op) {
+    int ret;
+    int flag;
+    int pid;
 
-  switch ( op )
-  { case NEWPIPE:
-      ret = createPipe ( pipe );
-      if ( ret < 0 ) return ( ret );
-      flag = O_RDONLY|O_NONBLOCK;
-      break;
-    case PIPE:
-      flag = O_WRONLY;
-      break;
-    default:
-      return ( getError ( INT, ERRZ21 ) );
-  }
-  pid = open ( pipe, flag, 0 );
-  if ( pid == -1 ) return ( getError ( SYS, errno ) );
-  return ( pid );
+    switch (op) {
+        case NEWPIPE:
+            ret = createPipe(pipe);
+            if (ret < 0) return (ret);
+            flag = O_RDONLY | O_NONBLOCK;
+            break;
+        case PIPE:
+            flag = O_WRONLY;
+            break;
+        default:
+            return (getError(INT, ERRZ21));
+    }
+    pid = open(pipe, flag, 0);
+    if (pid == -1) return (getError(SYS, errno));
+    return (pid);
 }
 
 // ************************************************************************* //
@@ -105,12 +105,12 @@ int SQ_Pipe_Open (char *pipe, int op)
 // Upon successful completion, a value of 0 is returned.  Otherwise, a negative
 // integer value is returned to indicate the error that has occured.
 
-int SQ_Pipe_Close (int pid, char *pipe)
-{ int	ret;
-  int	oid;
+int SQ_Pipe_Close(int pid, char *pipe) {
+    int ret;
+    int oid;
 
-  ret = close ( pid );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
+    ret = close(pid);
+    if (ret == -1) return (getError(SYS, errno));
 
 // Determine if there are any other readers on the pipe
 //
@@ -119,12 +119,12 @@ int SQ_Pipe_Close (int pid, char *pipe)
 // named file is a character special or block special file, and the device
 // associated with this special file does not exist.
 
-  oid = open ( pipe, O_WRONLY|O_NONBLOCK, 0 );
-  if ( oid == -1 )
-  { ret = unlink ( pipe );
-    if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  };
-  return ( 0 );
+    oid = open(pipe, O_WRONLY | O_NONBLOCK, 0);
+    if (oid == -1) {
+        ret = unlink(pipe);
+        if (ret == -1) return (getError(SYS, errno));
+    };
+    return (0);
 }
 
 // ************************************************************************* //
@@ -137,15 +137,15 @@ int SQ_Pipe_Close (int pid, char *pipe)
 // generated.  This signal is caught, where write will return -1 with errno set
 // to EPIPE ( ie broken pipe ).
 
-int SQ_Pipe_Write (int pid, u_char *writebuf, int nbytes)
-{ int	ret;
+int SQ_Pipe_Write(int pid, u_char *writebuf, int nbytes) {
+    int ret;
 
-  ret = write ( pid, writebuf, nbytes );
-  if ( ret == -1 )
-  { if ( errno == EPIPE ) return ( getError ( INT, ERRZ46 ) );
-    else return ( getError ( SYS, errno ) );
-  }
-  else return ( ret );
+    ret = write(pid, writebuf, nbytes);
+    if (ret == -1) {
+        if (errno == EPIPE) return (getError(INT, ERRZ46));
+        else return (getError(SYS, errno));
+    }
+    else return (ret);
 }
 
 // ************************************************************************* //
@@ -154,54 +154,57 @@ int SQ_Pipe_Write (int pid, u_char *writebuf, int nbytes)
 // of bytes actually read is returned.  Otherwise, a negative integer value is
 // returned to indicate the error that has occured.
 
-int SQ_Pipe_Read (int pid, u_char *readbuf, int tout)
-{ int	ret;
-  int	bytesread;
+int SQ_Pipe_Read(int pid, u_char *readbuf, int tout) {
+    int ret;
+    int bytesread;
 
-  // Wait for input
+    // Wait for input
 
-start:
+    start:
 
-  ret = seqioSelect ( pid, FDRD, tout );
-  if ( ret < 0 ) return ( ret );
+    ret = seqioSelect(pid, FDRD, tout);
+    if (ret < 0) return (ret);
 
-  // Read byte
+    // Read byte
 
-  bytesread = read ( pid, readbuf, 1 );
+    bytesread = read(pid, readbuf, 1);
 
-  if ((bytesread == -1) && (errno == EAGAIN))	// Resource temporarily unavail
-  { sleep(1);
-    goto start;
-  }
-
-  // An error has occured
-
-  if ( bytesread == -1 )
-  { if (errno == EAGAIN)			// Resource temporarily unavail
-    { sleep(1);					// wait a bit
-      errno = 0;				// clear this
-      goto start;				// and try again
-    }
-    return ( getError ( SYS, errno ) );		// EOF received
-  }
-  else if ( bytesread == 0 )			// Force read to time out
-  { if ( tout == 0 )
-    { ret = raise ( SIGALRM );
-      if ( ret == -1 )
-      { return ( getError ( SYS, errno ) );
-      }
-      return ( -1 );
+    if ((bytesread == -1) && (errno == EAGAIN))    // Resource temporarily unavail
+    {
+        sleep(1);
+        goto start;
     }
 
-  // Wait, then check for any data on the pipe
+    // An error has occured
 
-    sleep ( 1 );
-    return ( 0 );
-  }
+    if (bytesread == -1) {
+        if (errno == EAGAIN)            // Resource temporarily unavail
+        {
+            sleep(1);                    // wait a bit
+            errno = 0;                // clear this
+            goto start;                // and try again
+        }
+        return (getError(SYS, errno));        // EOF received
+    }
+    else if (bytesread == 0)            // Force read to time out
+    {
+        if (tout == 0) {
+            ret = raise(SIGALRM);
+            if (ret == -1) {
+                return (getError(SYS, errno));
+            }
+            return (-1);
+        }
 
-  // Return bytes read ( ie 1 )
+        // Wait, then check for any data on the pipe
 
-  else return ( 1 );
+        sleep(1);
+        return (0);
+    }
+
+        // Return bytes read ( ie 1 )
+
+    else return (1);
 }
 
 // ************************************************************************* //
@@ -215,10 +218,10 @@ start:
 // successful completion, a value of 0 is returned.  Otherwise, a negative
 // integer value is returned to indicate the error that has occured.
 
-int createPipe (char *pipe)
-{ int	ret;
+int createPipe(char *pipe) {
+    int ret;
 
-  ret = mkfifo ( pipe, MODE );
-  if ( ret == -1 ) return ( getError ( SYS, errno ) );
-  else return ( ret );
+    ret = mkfifo(pipe, MODE);
+    if (ret == -1) return (getError(SYS, errno));
+    else return (ret);
 }
